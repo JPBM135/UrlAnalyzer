@@ -10,11 +10,12 @@ export function sendNonDataResponse(res: Response) {
 	}
 }
 
-export function sendResponse<T>(data: T, res: Response<T>) {
+export function sendResponse<T extends { data: unknown; message: string }>(data: T['data'], res: Response) {
 	try {
 		res
 			.json({
-				...data,
+				message: 'success',
+				data,
 				error: null,
 			})
 			.end();

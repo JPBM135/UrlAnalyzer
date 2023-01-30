@@ -1,4 +1,4 @@
-import { createMd5 } from '@utils/hash.js';
+import { createDigestedHash } from '@utils/hash.js';
 import { resolveEnv } from '@utils/resolveEnv.js';
 import { validateStatusCode } from '@utils/validateStatusCode.js';
 import { OP_DELIMITER, SERVICES_CONSTANTS } from 'constants.js';
@@ -135,7 +135,7 @@ export async function checkUrlSafeBrowsing(urls: string[]): Promise<
 > {
 	const redis = container.resolve<Redis>(kRedis);
 
-	const cached = await redis.mget(...urls.map((url) => `safe-browsing:${createMd5(url)}`));
+	const cached = await redis.mget(...urls.map((url) => `safe-browsing:${createDigestedHash(url)}`));
 
 	const cachedUrls = cached.filter((url) => url !== null) as string[];
 
@@ -191,7 +191,7 @@ export async function checkUrlSafeBrowsing(urls: string[]): Promise<
 		if (!match.threat?.url) continue;
 
 		await redis.set(
-			`safe-browsing:${createMd5(match.threat.url)}`,
+			`safe-browsing:${createDigestedHash(match.threat.url)}`,
 			[
 				match.threat.url,
 				match.threatType ?? ThreadType.ThreadTypeUnspecified,
@@ -220,7 +220,7 @@ export async function checkUrlTransparencyReport(url: string): Promise<{
 	const redis = container.resolve<Redis>(kRedis);
 	let data: TransparencyReportResponse | null = null;
 
-	const cached = await redis.get(`transparency-report:${createMd5(url)}`);
+	const cached = await redis.get(`transparency-report:${createDigestedHash(url)}`);
 
 	if (cached) {
 		data = cached.split(OP_DELIMITER) as TransparencyReportResponse;
@@ -244,7 +244,7 @@ export async function checkUrlTransparencyReport(url: string): Promise<{
 		data = JSON.parse(rawData.split('\n').slice(2)![0]!)[0] as TransparencyReportResponse;
 
 		await redis.set(
-			`transparency-report:${createMd5(url)}`,
+			`transparency-report:${createDigestedHash(url)}`,
 			data.join(OP_DELIMITER),
 			'EX',
 			SERVICES_CONSTANTS.SAFE_BROWSING.EXPIRE_SECONDS,

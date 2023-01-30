@@ -24,6 +24,7 @@ export function createPostgres() {
 				parse: (isoString: string) => isoString,
 			},
 		},
+		debug: true,
 	});
 
 	container.register(kSQL, { useValue: sql });

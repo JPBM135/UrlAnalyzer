@@ -1,20 +1,25 @@
+import { checkAuth } from '@functions/auth/checkAuth.js';
 import { checkRateLimit } from '@functions/ratelimit/checkRateLimit.js';
 import { HttpError } from '@structures/httpError.js';
 import { errorResponse } from '@utils/respond.js';
 import type { NextFunction, Request, Response } from 'express';
 
-export function commonFunctionsMiddleware() {
+export function commonFunctionsMiddleware({ noAuthRoutes }: { noAuthRoutes: RegExp[] }) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const ratelimit = await checkRateLimit(req.ip, req.url.split('/')?.[0] ?? 'root', null);
+			const token = noAuthRoutes.some((regex) => regex.test(req.url)) ? null : await checkAuth(req);
 
-			for (const header of Object.keys(ratelimit.headers)) {
-				res.setHeader(header, String(ratelimit.headers[header]));
+			const rateLimit = await checkRateLimit(req.ip, req.url.split('/')?.[0] ?? 'root', null);
+
+			for (const header of Object.keys(rateLimit.headers)) {
+				res.setHeader(header, String(rateLimit.headers[header]));
 			}
 
-			if (ratelimit.error) {
-				throw ratelimit.error;
+			if (rateLimit.error) {
+				throw rateLimit.error;
 			}
+
+			console.log(token);
 
 			next();
 			return;

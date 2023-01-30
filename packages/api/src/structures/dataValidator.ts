@@ -1,18 +1,20 @@
 import { HttpStatusCode } from '../types/index.js';
 import { HttpError } from './httpError.js';
 
-interface DataOptions {
+type ConvertArray<T> = T extends (infer U)[] ? U : T;
+
+interface DataOptions<T> {
 	array?: boolean;
 	database?: {
 		table: string;
 	};
 	error?: string;
 	optional?: boolean;
-	validator(unknown: unknown): boolean;
+	validator(unknown: ConvertArray<T>): boolean;
 }
 
 type DataSchema<T> = {
-	[key in keyof T]: DataOptions;
+	[key in keyof T]: DataOptions<DataSchema<T[key]>>;
 };
 
 export class DataValidator<T> {
@@ -37,7 +39,7 @@ export class DataValidator<T> {
 			);
 		}
 
-		for (const [key, options] of Object.entries(this.schema) as unknown as [string, DataOptions][]) {
+		for (const [key, options] of Object.entries(this.schema) as unknown as [string, DataOptions<any>][]) {
 			// @ts-expect-error: This is a validator function
 			const dataEquivalent = data[key];
 

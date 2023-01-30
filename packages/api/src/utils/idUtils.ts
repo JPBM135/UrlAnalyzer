@@ -27,10 +27,3 @@ export function generateCompoundSnowflake(processId = 1, amount = 2): string {
 
 	return snowflakes.join('-');
 }
-
-console.log(generateSnowflake());
-console.log(generateSnowflake(2));
-console.log(generateCompoundSnowflake());
-console.log(generateCompoundSnowflake(2));
-console.log(generateCompoundSnowflake(2, 3));
-console.log(generateCompoundSnowflake(2, 4));

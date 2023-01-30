@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createServer as createHttpServer } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import process from 'node:process';
 import { URL } from 'node:url';
@@ -6,6 +7,7 @@ import { commonFunctionsMiddleware } from '@functions/middleware/commonFunctions
 import { createJsonValidatorMiddleware } from '@functions/middleware/jsonValidator.js';
 import { createMetricsMiddleware } from '@functions/middleware/metricsMiddleware.js';
 import { createRequestValidatorMiddleware } from '@functions/middleware/requestValidator.js';
+import { globToRegex } from '@utils/globToRegex.js';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -39,12 +41,17 @@ export function createExpressApp() {
 			methods: ['POST', 'PUT', 'PATCH'],
 		}),
 		// Responsible for authenticating the user
-		commonFunctionsMiddleware(),
+		commonFunctionsMiddleware({
+			noAuthRoutes: ['/metrics', '/api/v1/oauth2/*'].map((route) => globToRegex(route)),
+		}),
 	];
 
 	for (const middleware of middlewares) {
 		app.use(middleware);
 	}
+
+	const httpServer = createHttpServer(app);
+	httpServer.listen(process.env.PORT ?? 3_000);
 
 	const httpsServer = createHttpsServer(credentials, app);
 	httpsServer.listen(process.env.HTTPS_PORT ?? 8_080);

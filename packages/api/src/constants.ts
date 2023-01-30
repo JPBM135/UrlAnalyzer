@@ -20,7 +20,7 @@ export const CEP_API_BASE_URL = 'https://cdn.apicep.com/file/apicep/' as const;
 
 export const MAX_BODY_SIZE = 100_000 as const;
 
-export const TOKEN_EXPIRATION = 12 * 60 * 60 * 1_000;
+export const TOKEN_EXPIRATION_MS = 43_200_000;
 
 export const OP_DELIMITER = ';;' as const;
 
@@ -46,3 +46,13 @@ export const SERVICES_CONSTANTS = {
 		EXPIRE_SECONDS: 60 * 60,
 	},
 };
+
+export enum TableWorkerIdentifiers {
+	Users,
+	Sessions,
+	OAuthConnections,
+}
+
+export enum Providers {
+	Google = 'google',
+}
