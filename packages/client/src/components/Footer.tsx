@@ -5,7 +5,9 @@ export function Footer() {
 		<footer className="flex justify-between items-center p-4 bg-slate-800 text-gray-400">
 			<div>
 				<div className="border-b-gray-600 border-b">Url Analyzer</div>
-				<Link href="https://github.com/Url-Analyzer/UrlAnalyzer">Github repo</Link>
+				<Link href="https://github.com/Url-Analyzer/UrlAnalyzer" rel="noreferrer" target="_blank">
+					Github repo
+				</Link>
 			</div>
 			<div className="text-center">
 				<div>Copywrite &copy; 2023 - Url Analyzer</div>
