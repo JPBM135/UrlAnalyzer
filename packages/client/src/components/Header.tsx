@@ -24,7 +24,7 @@ export function Header({ hideLogin = false as boolean }): JSX.Element {
 				</Link>
 			</div>
 			<nav className="flex space-x-4">
-				<div className="text-white">
+				<div className="text-white text-lg ali">
 					{hideLogin ? (
 						<div />
 					) : auth.authenticated ? (
