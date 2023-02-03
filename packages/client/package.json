@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "yarn workspaces url_analyzer_types run build && next dev",
+		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"
@@ -14,8 +14,10 @@
 		"@types/react": "18.0.27",
 		"@types/react-dom": "18.0.10",
 		"next": "13.1.5",
+		"prop-types": "^15.8.1",
 		"react": "18.2.0",
-		"react-dom": "18.2.0"
+		"react-dom": "18.2.0",
+		"react-icons": "^4.7.1"
 	},
 	"devDependencies": {
 		"autoprefixer": "^10.4.13",

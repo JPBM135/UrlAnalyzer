@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"start:dev": "yarn build && yarn dev",
-		"build:copy": "yarn workspace url_analyzer_types run build",
+		"build:copy": "cpy ./src/types/*.ts ../client/src/types",
 		"build:clean": "del-cli dist",
 		"build:tsc": "tsc --project ./tsconfig.json",
 		"build:alias": "tsc-alias -p ./tsconfig.json",
@@ -26,6 +26,7 @@
 		"@types/node": "^18.11.18",
 		"cpy-cli": "^4.2.0",
 		"del-cli": "^5.0.0",
+		"discord-api-types": "^0.37.31",
 		"env-cmd": "^10.1.0",
 		"tsc-alias": "^1.8.2",
 		"typescript": "^4.9.4"
