@@ -11,6 +11,7 @@ export function Footer() {
 			</div>
 			<div className="text-center">
 				<div>Copywrite &copy; 2023 - Url Analyzer</div>
+				<div>All rights reserved - For Educational Purposes</div>
 			</div>
 			<div className="flex flex-col justify-evenly text-center">
 				<Link className="border-b-gray-600 border-b" href="/privacy">
