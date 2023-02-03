@@ -1,3 +1,4 @@
+import type { SafeSession } from './database.js';
 import type { HttpErrorCodes, HttpStatusCode } from './errorCodes.js';
 import type { If } from './utils.js';
 
@@ -32,3 +33,9 @@ export type GETOAuth2AuthorizeEndpointReturn = GeneralEndpointReturn<
 	},
 	'success'
 >;
+
+export type POSTAuthLoginEndpointReturn = GeneralEndpointReturn<SafeSession>;
+export interface POSTAuthLoginEndpointBody {
+	email: string;
+	password: string;
+}

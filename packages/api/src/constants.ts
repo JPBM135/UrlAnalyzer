@@ -22,6 +22,8 @@ export const MAX_BODY_SIZE = 100_000 as const;
 
 export const TOKEN_EXPIRATION_MS = 43_200_000;
 
+export const STATE_EXPIRATION_SECONDS = 60 * 30;
+
 export const OP_DELIMITER = ';;' as const;
 
 export const RATE_LIMITS = {
@@ -54,5 +56,8 @@ export enum TableWorkerIdentifiers {
 }
 
 export enum Providers {
+	Discord = 'discord',
+	GitHub = 'github',
 	Google = 'google',
+	Microsoft = 'microsoft',
 }

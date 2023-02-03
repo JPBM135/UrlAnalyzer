@@ -10,7 +10,7 @@ import { container } from 'tsyringe';
 export async function createSession(data: { user_id: string }): Promise<SafeSession> {
 	const sql = container.resolve<Sql<any>>(kSQL);
 
-	const token = await generateToken(data.user_id);
+	const token = generateToken(data.user_id);
 
 	const session: Omit<RawSession, 'created_at' | 'updated_at'> = {
 		id: generateCompoundSnowflake(TableWorkerIdentifiers.Sessions),

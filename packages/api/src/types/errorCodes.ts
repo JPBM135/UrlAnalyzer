@@ -6,6 +6,7 @@ export enum HttpErrorCodes {
 	EntityTooLarge = 'Entity too large',
 	EntityVerifyFailed = 'Failed to verify the entity',
 	InternalError = 'Internal server error',
+	InvalidLoginMethod = 'Invalid login method',
 	InvalidToken = 'Invalid token format',
 	LastAdminConstraint = 'Cannot deactivate the last system administrator',
 	LoginIncorrect = 'Incorrect email or password',
