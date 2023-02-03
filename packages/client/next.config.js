@@ -1,8 +1,10 @@
+// eslint-disable-next-line tsdoc/syntax
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
-}
+	reactStrictMode: true,
+	experimental: {
+		appDir: true,
+	},
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
