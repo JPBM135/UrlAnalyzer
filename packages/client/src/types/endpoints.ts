@@ -1,5 +1,6 @@
 import type { SafeSession } from './database.js';
 import type { HttpErrorCodes, HttpStatusCode } from './errorCodes.js';
+import type { UrlAnalysisResult } from './types.js';
 import type { If } from './utils.js';
 
 // General
@@ -39,3 +40,14 @@ export interface POSTAuthLoginEndpointBody {
 	email: string;
 	password: string;
 }
+
+// Scan
+
+export type POSTScanResultEndpointReturn = GeneralEndpointReturn<{
+	id: string;
+}>;
+export interface POSTScanResultEndpointBody {
+	url: string;
+}
+
+export type GETScanEndpointReturn = GeneralEndpointReturn<UrlAnalysisResult>;
