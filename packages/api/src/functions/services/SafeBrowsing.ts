@@ -5,137 +5,22 @@ import { OP_DELIMITER, SERVICES_CONSTANTS } from 'constants.js';
 import type { Redis } from 'ioredis';
 import { kRedis } from 'tokens.js';
 import { container } from 'tsyringe';
+import { ThreadType, ThreadEntryType, PlatformType, type TransparencyReportFlags } from 'types/enums.js';
+import type {
+	SafeBrowsing,
+	SafeBrowsingResponse,
+	TransparencyReport,
+	TransparencyReportResponse,
+} from 'types/types.js';
 import { request } from 'undici';
 import logger from '../../logger.js';
 
-export interface SafeBrowsingResponse {
-	matches: ThreatMatch[];
-}
-
-/**
- * A match when checking a threat entry in the Safe Browsing threat lists.
- */
-export interface ThreatMatch {
-	/**
-	 * The cache lifetime for the returned match. Clients must not cache this response for more than this duration to avoid false positives.
-	 */
-	cacheDuration?: string | null;
-	/**
-	 * The platform type matching this threat.
-	 */
-	platformType?: PlatformType;
-	/**
-	 * The threat matching this threat.
-	 */
-	threat?: ThreatEntry;
-	/**
-	 * Optional metadata associated with this threat.
-	 */
-	threatEntryMetadata?: ThreatEntryMetadata[];
-	/**
-	 * The threat entry type matching this threat.
-	 */
-	threatEntryType?: ThreadEntryType;
-	/**
-	 * The threat type matching this threat.
-	 */
-	threatType?: ThreadType;
-}
-
-export interface ThreatEntry {
-	/**
-	 * The digest of an executable in SHA256 format. The API supports both binary and hex digests. For JSON requests, digests are base64-encoded.
-	 */
-	digest?: string | null;
-	/**
-	 * A hash prefix, consisting of the most significant 4-32 bytes of a SHA256 hash. This field is in binary format. For JSON requests, hashes are base64-encoded.
-	 */
-	hash?: string | null;
-	/**
-	 * A URL.
-	 */
-	url?: string | null;
-}
-
-export interface ThreatEntryMetadata {
-	/**
-	 * The metadata entry key. For JSON requests, the key is base64-encoded.
-	 */
-	key?: string | null;
-	/**
-	 * The metadata entry value. For JSON requests, the value is base64-encoded.
-	 */
-	value?: string | null;
-}
-
-export enum ThreadEntryType {
-	Executable = 'EXECUTABLE',
-	ThreadEntryTypeUnspecified = 'THREAT_ENTRY_TYPE_UNSPECIFIED',
-	Url = 'URL',
-}
-
-export enum ThreadType {
-	Malware = 'MALWARE',
-	PotentiallyHarmfulApplication = 'POTENTIALLY_HARMFUL_APPLICATION',
-	SocialEngineering = 'SOCIAL_ENGINEERING',
-	ThreadTypeUnspecified = 'THREAT_TYPE_UNSPECIFIED',
-	UnwantedSoftware = 'UNWANTED_SOFTWARE',
-}
-
-export enum PlatformType {
-	AllPlatforms = 'ALL_PLATFORMS',
-	Android = 'ANDROID',
-	AnyPlatform = 'ANY_PLATFORM',
-	Chrome = 'CHROME',
-	Ios = 'IOS',
-	Linux = 'LINUX',
-	Osx = 'OSX',
-	PlatformTypeUnspecified = 'PLATFORM_TYPE_UNSPECIFIED',
-	Windows = 'WINDOWS',
-}
-
-export type TransparencyReportResponse = [
-	string,
-	TransparencyReportGenericStatus,
-	NumberBoolean,
-	NumberBoolean,
-	NumberBoolean,
-	NumberBoolean,
-	NumberBoolean,
-	number,
-	string,
-];
-
-export enum TransparencyReportGenericStatus {
-	NoUnsafeContentFound = 1,
-	UnsafeContentFound,
-	SomePagesUnsafe,
-	Whitelisted,
-	NotCommonDownloads,
-	NoDataAvailable,
-}
-
-export enum TransparencyReportFlags {
-	SendsVisitorsToMalwareSites,
-	InstallMalwareOrMaliciousCode,
-	TrickUsersIntoSharingPersonalInfo,
-	ContainsMalwareOrMaliciousCode,
-	DistributesUncommonDownloads,
-}
-
-export type NumberBoolean = 0 | 1;
-
-export async function checkUrlSafeBrowsing(urls: string[]): Promise<
-	{
-		platformType: PlatformType;
-		threatEntryType: ThreadEntryType;
-		threatType: ThreadType;
-		url: string;
-	}[]
-> {
+export async function checkUrlSafeBrowsing(urls: string[]): Promise<SafeBrowsing[]> {
 	const redis = container.resolve<Redis>(kRedis);
 
-	const cached = await redis.mget(...urls.map((url) => `safe-browsing:${createDigestedHash(url)}`));
+	const filteredUrls = [...new Set(urls)];
+
+	const cached = await redis.mget(...filteredUrls.map((url) => `safe-browsing:${createDigestedHash(url)}`));
 
 	const cachedUrls = cached.filter((url) => url !== null) as string[];
 
@@ -161,7 +46,7 @@ export async function checkUrlSafeBrowsing(urls: string[]): Promise<
 			threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
 			platformTypes: ['ANY_PLATFORM'],
 			threatEntryTypes: ['URL', 'EXECUTABLE'],
-			threatEntries: urls.map((link) => ({ url: link })),
+			threatEntries: filteredUrls.map((link) => ({ url: link })),
 		},
 	};
 
@@ -174,7 +59,7 @@ export async function checkUrlSafeBrowsing(urls: string[]): Promise<
 	);
 
 	if (!validateStatusCode(res.statusCode)) {
-		logger.error(`Safe Browsing API returned status code ${res.statusCode} for ${urls.join(', ')}`, {
+		logger.error(`Safe Browsing API returned status code ${res.statusCode} for ${filteredUrls.join(', ')}`, {
 			service: 'Safe Browsing',
 			statusCode: res.statusCode,
 			body: await res.body.json(),
@@ -211,12 +96,7 @@ export async function checkUrlSafeBrowsing(urls: string[]): Promise<
 	}));
 }
 
-export async function checkUrlTransparencyReport(url: string): Promise<{
-	flags: TransparencyReportFlags[];
-	lastTimeChecked: number;
-	status: TransparencyReportGenericStatus;
-	url: string;
-} | null> {
+export async function checkUrlTransparencyReport(url: string): Promise<TransparencyReport | null> {
 	const redis = container.resolve<Redis>(kRedis);
 	let data: TransparencyReportResponse | null = null;
 
