@@ -1,6 +1,8 @@
 'use client';
 
-const onSubmit = (elm: React.FormEvent) => {
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
+
+const onSubmit = (elm: React.FormEvent, router: AppRouterInstance) => {
 	elm.preventDefault();
 	const url = document.querySelector('#url-input') as HTMLInputElement;
 
@@ -12,13 +14,13 @@ const onSubmit = (elm: React.FormEvent) => {
 
 	url.style.border = '2px solid green';
 
-	console.log(url.value);
+	router.push(`/scan/${encodeURIComponent(url.value)}`);
 };
 
-export function AnalyzerBar() {
+export function AnalyzerBar({ router }: { router: AppRouterInstance }) {
 	return (
 		<div className="flex flex-col justify-center items-center">
-			<form className="flex flex-col justify-center items-center" onSubmit={onSubmit}>
+			<form className="flex flex-col justify-center items-center" onSubmit={(elm) => onSubmit(elm, router)}>
 				<input
 					className="w-[27rem] p-2 rounded-lg border-2 text-black"
 					id="url-input"
