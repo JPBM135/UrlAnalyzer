@@ -1,3 +1,5 @@
+import type { HTTPRequest } from 'puppeteer';
+
 export const URL_SCAN_EPOCH = new Date().setFullYear(2_003, 10, 20);
 
 export const REGEXES = {
@@ -14,6 +16,7 @@ export const REGEXES = {
 	RG: /\d{2}(?:\.?\d{3}){2}-?\d/,
 	// eslint-disable-next-line unicorn/no-unsafe-regex
 	CPF: /\d{3}(?:\.?\d{3}){2}[/-]?\d/,
+	URL: /https?:\/\/(?:www\.)?[\w#%+.:=@~-]{1,256}\.[\d()A-Za-z]{1,6}\b[\w#%&()+./:=?@~-]*/g,
 } as const;
 
 export const CEP_API_BASE_URL = 'https://cdn.apicep.com/file/apicep/' as const;
@@ -24,7 +27,7 @@ export const TOKEN_EXPIRATION_MS = 43_200_000;
 
 export const STATE_EXPIRATION_SECONDS = 60 * 30;
 
-export const OP_DELIMITER = ';;' as const;
+export const OP_DELIMITER = '-' as const;
 
 export const RATE_LIMITS = {
 	USER: {
@@ -53,6 +56,11 @@ export enum TableWorkerIdentifiers {
 	Users,
 	Sessions,
 	OAuthConnections,
+	ScanNonce,
+	Scan,
+	Certificates,
+	Request,
+	Response,
 }
 
 export enum Providers {
@@ -61,3 +69,10 @@ export enum Providers {
 	Google = 'google',
 	Microsoft = 'microsoft',
 }
+
+export const allowedResourceTypes: ReturnType<HTTPRequest['resourceType']>[] = [
+	'document',
+	'stylesheet',
+	'font',
+	'script',
+];
