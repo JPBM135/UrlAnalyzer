@@ -20,6 +20,7 @@ export async function scanHandlerHandler(req: Request, res: Response): Promise<v
 		sendResponse<POSTScanResultEndpointReturn>(
 			{
 				id: analysis.id,
+				url: analysis.url,
 			},
 			res,
 		);
