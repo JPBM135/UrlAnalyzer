@@ -73,6 +73,9 @@ export enum Providers {
 export const allowedResourceTypes: ReturnType<HTTPRequest['resourceType']>[] = [
 	'document',
 	'stylesheet',
-	'font',
 	'script',
+	'xhr',
+	'fetch',
 ];
+
+export const ImgurRateLimitTime = 86_400;
