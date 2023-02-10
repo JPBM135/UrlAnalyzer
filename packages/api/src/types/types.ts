@@ -159,6 +159,7 @@ export interface Certificate extends BaseProps {
 }
 
 export interface UrlAnalysisResult extends BaseProps {
+	authorId: string | null;
 	body: string;
 	certificate: RawCertificate;
 	certificate_id: string;
@@ -169,7 +170,6 @@ export interface UrlAnalysisResult extends BaseProps {
 	effectiveUrl: string;
 	lhReport: LightHouseReport;
 	metadata: Record<string, unknown>;
-	ownerId: string | null;
 	requests: PopulatedRequest[];
 	requests_ids: string[];
 	screenshot: Screenshot | null;

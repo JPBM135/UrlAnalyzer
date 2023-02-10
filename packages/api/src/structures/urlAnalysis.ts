@@ -72,7 +72,7 @@ export default class UrlAnalysis {
 
 	public requests_ids: string[] = [];
 
-	public owner_id: string | null = null;
+	public author_id: string | null = null;
 
 	private dbResult: RawUrlAnalysis | null = null;
 
@@ -80,7 +80,7 @@ export default class UrlAnalysis {
 		this.browser = container.resolve<Browser>(kPuppeteer);
 
 		this.id = generateSnowflake(TableWorkerIdentifiers.Scan);
-		this.owner_id = owner_id;
+		this.author_id = owner_id;
 
 		this.url = url;
 
@@ -157,11 +157,11 @@ export default class UrlAnalysis {
 			scores: LightHouseReport['scores'];
 		} = {
 			scores: {
-				performance: lh_analysis.lhr.categories!.performance!.score ?? null,
-				accessibility: lh_analysis.lhr.categories!.accessibility!.score ?? null,
-				'best-practices': lh_analysis.lhr.categories!.bestPractices!.score ?? null,
-				seo: lh_analysis.lhr.categories!.seo!.score ?? null,
-				pwa: lh_analysis.lhr.categories!.pwa!.score ?? null,
+				performance: lh_analysis.lhr.categories?.performance?.score ?? null,
+				accessibility: lh_analysis.lhr.categories?.accessibility?.score ?? null,
+				'best-practices': lh_analysis.lhr.categories?.bestPractices?.score ?? null,
+				seo: lh_analysis.lhr.categories?.seo?.score ?? null,
+				pwa: lh_analysis.lhr.categories?.pwa?.score ?? null,
 			},
 			audits: {},
 		};
@@ -366,7 +366,7 @@ export default class UrlAnalysis {
 		await Promise.all([this.page!.close(), ...this._promises]);
 
 		const dbResult = await createUrlAnalysis({
-			owner_id: this.owner_id,
+			author_id: this.author_id,
 			url: this.url,
 			effective_url: this.effectiveUrl!,
 			screenshot: this.screenshotUrl,
@@ -433,7 +433,7 @@ export default class UrlAnalysis {
 
 		return {
 			...result,
-			ownerId: result.owner_id,
+			authorId: result.author_id,
 			contactedDomains: result.contacted_domains,
 			consoleOutput: result.console_output,
 			effectiveUrl: result.effective_url,

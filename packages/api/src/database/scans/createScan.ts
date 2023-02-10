@@ -10,7 +10,7 @@ export async function createUrlAnalysis(
 
 	const query: Omit<RawUrlAnalysis, 'created_at' | 'updated_at'> = {
 		id: data.id,
-		owner_id: data.owner_id,
+		author_id: data.author_id,
 		body: data.body,
 		certificate_id: data.certificate_id,
 		contacted_domains: data.contacted_domains,

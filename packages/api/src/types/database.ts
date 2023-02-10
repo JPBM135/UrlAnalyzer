@@ -66,7 +66,7 @@ export type ModifiableSession = never;
 export type SafeSession = Omit<RawSession, 'session_token'> & { token: string };
 
 export interface RawUrlAnalysis extends BaseProps {
-	owner_id: string | null;
+	author_id: string | null;
 	url: string;
 	contacted_domains: string[];
 	dns: Record<string, string[]>;
