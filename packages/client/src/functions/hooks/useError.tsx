@@ -19,7 +19,7 @@ export const useError = (initial: string | null = null) => {
 				errorPrompt.classList.remove('transition', 'opacity-100', 'duration-100');
 				errorPrompt.classList.add('transition', 'opacity-0', 'duration-500');
 				setTimeout(() => setError(null), 500);
-			}, 3_000);
+			}, 5_000);
 		}
 	}, [error, errorElementId]);
 
