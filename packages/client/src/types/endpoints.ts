@@ -45,6 +45,7 @@ export interface POSTAuthLoginEndpointBody {
 
 export type POSTScanResultEndpointReturn = GeneralEndpointReturn<{
 	id: string;
+	url: string;
 }>;
 export interface POSTScanResultEndpointBody {
 	url: string;
