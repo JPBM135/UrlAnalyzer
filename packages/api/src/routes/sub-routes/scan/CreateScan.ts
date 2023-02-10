@@ -13,7 +13,7 @@ export async function scanHandlerHandler(req: Request, res: Response): Promise<v
 			throw new HttpError(HttpStatusCode.BadRequest, 'ValidationFailed', 'Missing URL');
 		}
 
-		const analysis = new UrlAnalysis(url);
+		const analysis = new UrlAnalysis(url, null);
 
 		void analysis.navigate();
 

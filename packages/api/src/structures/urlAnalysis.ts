@@ -20,7 +20,14 @@ import getMetaData from 'metadata-scraper';
 import type { Page, Protocol, Browser, CDPSession, HTTPResponse, HTTPRequest } from 'puppeteer';
 import { kCache, kImgur, kPuppeteer } from 'tokens.js';
 import { container } from 'tsyringe';
-import type { ConsoleOutput, InternalCache, Screenshot, UrlAnalysisResult, UrlSecurityDetails } from 'types/types.js';
+import type {
+	ConsoleOutput,
+	InternalCache,
+	LightHouseReport,
+	Screenshot,
+	UrlAnalysisResult,
+	UrlSecurityDetails,
+} from 'types/types.js';
 
 export default class UrlAnalysis {
 	public browser: Browser;
@@ -59,20 +66,21 @@ export default class UrlAnalysis {
 
 	public certificate_id: string | null = null;
 
-	public created_at: string | null = null;
-
-	public updated_at: string | null = null;
+	public lhReport: LightHouseReport | null = null;
 
 	public id: string;
 
 	public requests_ids: string[] = [];
 
+	public owner_id: string | null = null;
+
 	private dbResult: RawUrlAnalysis | null = null;
 
-	public constructor(url: string) {
+	public constructor(url: string, owner_id: string | null) {
 		this.browser = container.resolve<Browser>(kPuppeteer);
 
 		this.id = generateSnowflake(TableWorkerIdentifiers.Scan);
+		this.owner_id = owner_id;
 
 		this.url = url;
 
@@ -136,17 +144,43 @@ export default class UrlAnalysis {
 	}
 
 	public async lightHouse() {
-		return lighthouse(this.url, {
+		const lh_analysis = await lighthouse(this.url, {
 			port: Number(new URL(this.browser.wsEndpoint()).port),
 			output: 'json',
 			logLevel: 'error',
-		}).then((result) => {
-			const lighthouseResult = result!.lhr;
-			console.log('Report', lighthouseResult);
-			console.log('Report is done for', lighthouseResult.mainDocumentUrl);
-			console.log('Cat analyzed', Object.keys(lighthouseResult.categories));
-			console.log('Score was', lighthouseResult.categories);
 		});
+
+		if (!lh_analysis) return;
+
+		const partial: {
+			audits: Partial<LightHouseReport['audits']>;
+			scores: LightHouseReport['scores'];
+		} = {
+			scores: {
+				performance: lh_analysis.lhr.categories!.performance!.score ?? null,
+				accessibility: lh_analysis.lhr.categories!.accessibility!.score ?? null,
+				'best-practices': lh_analysis.lhr.categories!.bestPractices!.score ?? null,
+				seo: lh_analysis.lhr.categories!.seo!.score ?? null,
+				pwa: lh_analysis.lhr.categories!.pwa!.score ?? null,
+			},
+			audits: {},
+		};
+
+		for (const [key, value] of Object.entries(lh_analysis.lhr.categories)) {
+			const audits = value.auditRefs.map((audit) => {
+				const auditData = lh_analysis.lhr.audits[audit.id];
+
+				return {
+					id: audit.id,
+					score: auditData?.score ?? null,
+					group: audit.group ?? null,
+				};
+			});
+
+			Reflect.set(partial.audits, key, audits);
+		}
+
+		this.lhReport = partial as LightHouseReport;
 	}
 
 	public async screenshot() {
@@ -332,6 +366,7 @@ export default class UrlAnalysis {
 		await Promise.all([this.page!.close(), ...this._promises]);
 
 		const dbResult = await createUrlAnalysis({
+			owner_id: this.owner_id,
 			url: this.url,
 			effective_url: this.effectiveUrl!,
 			screenshot: this.screenshotUrl,
@@ -346,6 +381,7 @@ export default class UrlAnalysis {
 			certificate_id: this.certificate_id!,
 			id: this.id,
 			requests_ids: this.requests_ids,
+			lh_report: this.lhReport,
 		});
 
 		this.dbResult = dbResult;
@@ -397,6 +433,7 @@ export default class UrlAnalysis {
 
 		return {
 			...result,
+			ownerId: result.owner_id,
 			contactedDomains: result.contacted_domains,
 			consoleOutput: result.console_output,
 			effectiveUrl: result.effective_url,
@@ -404,6 +441,7 @@ export default class UrlAnalysis {
 			urlsFound: result.urls_found,
 			certificate: result.certificate!,
 			requests: result.requests!,
+			lhReport: result.lh_report!,
 		};
 	}
 }

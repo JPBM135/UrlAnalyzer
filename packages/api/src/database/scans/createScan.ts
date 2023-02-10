@@ -10,6 +10,7 @@ export async function createUrlAnalysis(
 
 	const query: Omit<RawUrlAnalysis, 'created_at' | 'updated_at'> = {
 		id: data.id,
+		owner_id: data.owner_id,
 		body: data.body,
 		certificate_id: data.certificate_id,
 		contacted_domains: data.contacted_domains,
@@ -23,6 +24,7 @@ export async function createUrlAnalysis(
 		security_details: data.security_details,
 		urls_found: data.urls_found,
 		url: data.url,
+		lh_report: data.lh_report,
 	};
 
 	const [result] = await sql<[RawUrlAnalysis]>`

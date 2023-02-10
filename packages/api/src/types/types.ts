@@ -167,13 +167,67 @@ export interface UrlAnalysisResult extends BaseProps {
 	cookies: Protocol.Network.Cookie[];
 	dns: Record<string, string[]>;
 	effectiveUrl: string;
+	lhReport: LightHouseReport;
 	metadata: Record<string, unknown>;
+	ownerId: string | null;
 	requests: PopulatedRequest[];
 	requests_ids: string[];
 	screenshot: Screenshot | null;
 	securityDetails: UrlSecurityDetails;
 	url: string;
 	urlsFound: string[];
+}
+
+export interface LightHouseReport {
+	audits: {
+		accessibility: Record<
+			string,
+			{
+				group: string;
+				id: string;
+				score: number | null;
+			}
+		>;
+		'best-practices': Record<
+			string,
+			{
+				group: string;
+				id: string;
+				score: number | null;
+			}
+		>;
+		performance: Record<
+			string,
+			{
+				group: string;
+				id: string;
+				score: number | null;
+			}
+		>;
+		pwa: Record<
+			string,
+			{
+				group: string;
+				id: string;
+				score: number | null;
+			}
+		>;
+		seo: Record<
+			string,
+			{
+				group: string;
+				id: string;
+				score: number | null;
+			}
+		>;
+	};
+	scores: {
+		accessibility: number | null;
+		'best-practices': number | null;
+		performance: number | null;
+		pwa: number | null;
+		seo: number | null;
+	};
 }
 
 export type InternalCache = Map<
