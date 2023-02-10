@@ -15,6 +15,7 @@ import { convertCert, parseInfoAccess, parseIssuer, parseSubject, parseSubjectAl
 import { formatHTTPRequest, formatHTTPResponse } from '@utils/formatReq.js';
 import { generateCompoundSnowflake, generateSnowflake } from '@utils/idUtils.js';
 import { allowedResourceTypes, REGEXES, TableWorkerIdentifiers } from 'constants.js';
+import lighthouse from 'lighthouse';
 import getMetaData from 'metadata-scraper';
 import type { Page, Protocol, Browser, CDPSession, HTTPResponse, HTTPRequest } from 'puppeteer';
 import { kCache, kImgur, kPuppeteer } from 'tokens.js';
@@ -109,6 +110,7 @@ export default class UrlAnalysis {
 				this.resolveDns(),
 				this.getCertificate(client, pageResponse!),
 				this.securityDetails(),
+				this.lightHouse(),
 			]);
 
 			this.body = body;
@@ -131,6 +133,20 @@ export default class UrlAnalysis {
 				added: Date.now(),
 			});
 		}
+	}
+
+	public async lightHouse() {
+		return lighthouse(this.url, {
+			port: Number(new URL(this.browser.wsEndpoint()).port),
+			output: 'json',
+			logLevel: 'error',
+		}).then((result) => {
+			const lighthouseResult = result!.lhr;
+			console.log('Report', lighthouseResult);
+			console.log('Report is done for', lighthouseResult.mainDocumentUrl);
+			console.log('Cat analyzed', Object.keys(lighthouseResult.categories));
+			console.log('Score was', lighthouseResult.categories);
+		});
 	}
 
 	public async screenshot() {
@@ -251,7 +267,7 @@ export default class UrlAnalysis {
 				...request.response,
 				id: this.id,
 				parent_id: this.id,
-				body: resource_type_allowed ? this.body : null,
+				body: resource_type_allowed ? request.response.body : null,
 			});
 			const dbRequest = await createRequest({
 				...request,
