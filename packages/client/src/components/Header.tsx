@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { MdLogin, MdLogout } from 'react-icons/md';
-import UrlAnalyzerSvg from '../public/favicon.ico';
+import UrlAnalyzerSvg from '../../public/favicon.ico';
 
 export function Header({ hideLogin = false as boolean }): JSX.Element {
 	const auth = useAuth();

@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { SiDiscord } from 'react-icons/si';
-import MicrosoftSvg from '../../public/Microsoft.svg';
+import MicrosoftSvg from '../../../public/Microsoft.svg';
 import { validateEmail } from '../../utils/validators';
 
 const handleNormalLogin = async (setters: {
