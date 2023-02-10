@@ -3,6 +3,7 @@ import { HttpError } from '@structures/httpError.js';
 import { HttpStatusCode } from '@types';
 import { createDigestedHash } from '@utils/hash.js';
 import { resolveEnv } from '@utils/resolveEnv.js';
+import { ImgurRateLimitTime } from 'constants.js';
 import got from 'got';
 import ImgurClient from 'imgur';
 import type { Redis } from 'ioredis';
@@ -10,9 +11,6 @@ import { kRedis } from 'tokens.js';
 import { container } from 'tsyringe';
 
 export default class Imgur {
-	// Seconds in a day
-	#rateLimitTime = 86_400;
-
 	public imgurClient: ImgurClient.ImgurClient;
 
 	public redis = container.resolve<Redis>(kRedis);
@@ -32,7 +30,7 @@ export default class Imgur {
 		});
 
 		if (!this.redis.exists('rateLimits:imgur_upload')) {
-			this.redis.set('rateLimits:imgur_upload', 0, 'EX', this.#rateLimitTime, 'NX');
+			this.redis.set('rateLimits:imgur_upload', 0, 'EX', ImgurRateLimitTime, 'NX');
 		}
 	}
 
@@ -84,7 +82,7 @@ export default class Imgur {
 				id: image.data.deletehash ?? null,
 			}),
 			'EX',
-			this.#rateLimitTime,
+			ImgurRateLimitTime,
 			'NX',
 		);
 
