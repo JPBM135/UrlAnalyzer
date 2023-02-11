@@ -1,21 +1,22 @@
 'use client';
 
+import { LoadingSpin } from '@app/components/Loading';
+import { RandomFacts } from '@app/components/RandomFact';
 import { UrlAnalysisResult as UrlAnalysisResultComponent } from '@app/components/UrlAnalysisResult';
-import { useError } from '@app/functions/hooks/useError';
 import type { GETScanEndpointReturn } from '@app/types';
 import { makeApiRequest } from '@app/utils/makeApiReq';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { BiErrorAlt } from 'react-icons/bi';
+import { RxDoubleArrowLeft } from 'react-icons/rx';
 
 export default function ScanPage() {
-	const { ErrorElement, setError } = useError();
-
-	const router = useRouter();
-
 	const search = usePathname()!;
 	const id = decodeURIComponent(search.split('/').pop()!);
 
 	const [result, setResult] = useState<GETScanEndpointReturn | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -28,10 +29,9 @@ export default function ScanPage() {
 				clearInterval(interval);
 			}
 
-			if (res.message !== 'success' && res.error?.status !== 404) {
-				setError(`${res.error!.code!} - ${res.error!.description}`);
+			if (res.message !== 'success' && res.error?.code !== 'NavigationInProgress') {
 				clearInterval(interval);
-				router.push('/');
+				setError(`There was an error while processing your request: ${res.error?.description ?? 'Unknown error'}`);
 			}
 		};
 
@@ -40,14 +40,32 @@ export default function ScanPage() {
 	}, []);
 
 	return (
-		<>
-			<ErrorElement />
-			<main className="flex flex-col gap-4 pt-[3rem]">
-				<div className="ml-20 my-20 w-fit text-4xl font-bold text-left font-sans text-gray-500 p-4 bg-gray-200 rounded-xl">
-					{result ? `Results for ${result.data?.url}` : 'Processing...'}
+		<main className={`flex flex-col gap-4 pt-12 ${error || !result ? 'justify-between' : ''}`}>
+			{result ? (
+				<div className="mx-20 my-10 text-5xl font-bold font-sans p-4 bg-gray-100 rounded-xl text-center text-gray-600">
+					Results for {result.data?.url}
 				</div>
-				{result ? <UrlAnalysisResultComponent res={result!} /> : null}
-			</main>
-		</>
+			) : error ? (
+				<div className="flex justify-between h-full flex-col items-center gap-72">
+					<div className="flex justify-center items-center m-20 text-5xl font-bold font-sans p-4 bg-gray-100 rounded-xl text-center text-gray-600 gap-4">
+						<BiErrorAlt className="fast-animate-pulse" color="red" size={64} />
+						{error}
+					</div>
+					<Link className="flex items-center gap-2 text-white w-fit p-3 rounded text-2xl bg-gray-500" href="/">
+						<RxDoubleArrowLeft />
+						Go back
+					</Link>
+				</div>
+			) : (
+				<div className="flex justify-between h-full flex-col items-center gap-72">
+					<div className="flex justify-center items-center m-20 text-5xl font-bold font-sans bg-gray-100 rounded-xl text-center text-gray-600">
+						<LoadingSpin />
+						Processing your request...
+					</div>
+					<RandomFacts />
+				</div>
+			)}
+			{result ? <UrlAnalysisResultComponent res={result!} /> : null}
+		</main>
 	);
 }
