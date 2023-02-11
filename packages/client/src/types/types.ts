@@ -159,6 +159,7 @@ export interface Certificate extends BaseProps {
 }
 
 export interface UrlAnalysisResult extends BaseProps {
+	authorId: string | null;
 	body: string;
 	certificate: RawCertificate;
 	certificate_id: string;
@@ -167,6 +168,7 @@ export interface UrlAnalysisResult extends BaseProps {
 	cookies: Protocol.Network.Cookie[];
 	dns: Record<string, string[]>;
 	effectiveUrl: string;
+	lighthouseAnalysis: LightHouseReport;
 	metadata: Record<string, unknown>;
 	requests: PopulatedRequest[];
 	requests_ids: string[];
@@ -174,6 +176,37 @@ export interface UrlAnalysisResult extends BaseProps {
 	securityDetails: UrlSecurityDetails;
 	url: string;
 	urlsFound: string[];
+}
+
+type LightHouseAudits = Record<
+	string,
+	{
+		extra: {
+			fix: string | null;
+			impact: 'critical' | 'minor' | 'moderate' | 'serious' | null;
+			type: 'incomplete' | 'notApplicable' | 'passes' | 'violations';
+		} | null;
+		group: string | null;
+		id: string;
+		score: number | null;
+	}
+>;
+
+export interface LightHouseReport {
+	audits: {
+		accessibility: LightHouseAudits;
+		'best-practices': LightHouseAudits;
+		performance: LightHouseAudits;
+		pwa: LightHouseAudits;
+		seo: LightHouseAudits;
+	};
+	scores: {
+		accessibility: number | null;
+		'best-practices': number | null;
+		performance: number | null;
+		pwa: number | null;
+		seo: number | null;
+	};
 }
 
 export type InternalCache = Map<

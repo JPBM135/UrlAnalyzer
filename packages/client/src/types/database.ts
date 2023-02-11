@@ -1,6 +1,6 @@
 /* eslint-disable typescript-sort-keys/interface */
 import type { Protocol } from 'puppeteer';
-import type { ConsoleOutput, RequestResult, Screenshot, UrlSecurityDetails } from './types.js';
+import type { ConsoleOutput, LightHouseReport, RequestResult, Screenshot, UrlSecurityDetails } from './types.js';
 import type { OmitBaseProps, OmitBasePropsAndMore } from './utils.js';
 
 export interface BaseProps {
@@ -66,6 +66,7 @@ export type ModifiableSession = never;
 export type SafeSession = Omit<RawSession, 'session_token'> & { token: string };
 
 export interface RawUrlAnalysis extends BaseProps {
+	author_id: string | null;
 	url: string;
 	contacted_domains: string[];
 	dns: Record<string, string[]>;
@@ -79,6 +80,7 @@ export interface RawUrlAnalysis extends BaseProps {
 	console_output: ConsoleOutput[];
 	requests_ids: string[];
 	certificate_id: string;
+	lighthouse_analysis: LightHouseReport | null;
 }
 
 export interface RawCertificate extends BaseProps {
