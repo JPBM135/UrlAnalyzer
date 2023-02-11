@@ -7,3 +7,13 @@
 :root {
 	background-color: #121212;
 }
+
+.load {
+	animation: load-gauge 1s ease-in-out forwards;
+}
+
+@keyframes load-gauge {
+	from {
+		stroke-dasharray: 0 360;
+	}
+}

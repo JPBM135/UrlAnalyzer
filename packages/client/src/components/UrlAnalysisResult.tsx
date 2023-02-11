@@ -6,11 +6,12 @@ import { useState } from 'react';
 import { GeneralInfo } from './UrlAnalyzerTabs/GeneralInfo';
 import { PageInfo } from './UrlAnalyzerTabs/PageDetails';
 import { Requests } from './UrlAnalyzerTabs/Request';
+import { ScoreAndAnalysis } from './UrlAnalyzerTabs/ScoreAndAnalysis';
 
 export function UrlAnalysisResult({ res }: { res: GETScanEndpointReturn }) {
 	const { data } = res;
 
-	const [tab, setTab] = useState<'body' | 'general' | 'page_info' | 'requests' | 'score'>('general');
+	const [tab, setTab] = useState<'general' | 'page_info' | 'requests' | 'score'>('general');
 	const router = useRouter();
 
 	if (!data)
@@ -47,7 +48,7 @@ export function UrlAnalysisResult({ res }: { res: GETScanEndpointReturn }) {
 					Page Details
 				</button>
 				<div className="border border-gray-200" />
-				<button className="h-full py-2 w-full bg-slate-700 rounded mx-8" onClick={() => setTab('body')} type="button">
+				<button className="h-full py-2 w-full bg-slate-700 rounded mx-8" onClick={() => setTab('score')} type="button">
 					Score and Analysis
 				</button>
 			</div>
@@ -55,8 +56,10 @@ export function UrlAnalysisResult({ res }: { res: GETScanEndpointReturn }) {
 				<GeneralInfo result={data} router={router} />
 			) : tab === 'requests' ? (
 				<Requests result={data} />
+			) : tab === 'page_info' ? (
+				<PageInfo result={data} />
 			) : (
-				tab === 'page_info' && <PageInfo result={data} />
+				tab === 'score' && <ScoreAndAnalysis result={data} />
 			)}
 		</>
 	);
