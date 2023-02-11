@@ -15,6 +15,7 @@ export enum HttpErrorCodes {
 	MissingParameters = 'One or more required parameters were not provided',
 	MissingPermissions = 'You do not have permission to perform this action',
 	NavigationFailed = 'Navigation to this resource failed',
+	NavigationInProgress = 'Navigation in progress',
 	NoAuthHeader = 'No authorization header was provided',
 	NoToken = 'No token was provided along with the authorization header',
 	NotFound = 'Resource not found',
