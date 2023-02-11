@@ -6,13 +6,13 @@ export function CodeRenderer({ data, ok }: { data: string; ok: boolean }): JSX.E
 
 	return ok ? (
 		<div
-			className={style}
+			className={`bg-gray-900 break-all p-3 rounded word-wrap ${style}`}
 			/* eslint-disable-next-line react/no-danger */
 			dangerouslySetInnerHTML={{
 				__html: data,
 			}}
 		/>
 	) : (
-		<div className="bg-gray-600 break-all p-3 rounded word-wrap">{data}</div>
+		<div className="bg-gray-900 break-all p-3 rounded word-wrap">{data}</div>
 	);
 }
