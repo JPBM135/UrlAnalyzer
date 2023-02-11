@@ -80,7 +80,7 @@ export interface RawUrlAnalysis extends BaseProps {
 	console_output: ConsoleOutput[];
 	requests_ids: string[];
 	certificate_id: string;
-	lh_report: LightHouseReport | null;
+	lighthouse_analysis: LightHouseReport | null;
 }
 
 export interface RawCertificate extends BaseProps {

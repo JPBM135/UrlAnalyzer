@@ -24,7 +24,7 @@ export async function createUrlAnalysis(
 		security_details: data.security_details,
 		urls_found: data.urls_found,
 		url: data.url,
-		lh_report: data.lh_report,
+		lighthouse_analysis: data.lighthouse_analysis,
 	};
 
 	const [result] = await sql<[RawUrlAnalysis]>`

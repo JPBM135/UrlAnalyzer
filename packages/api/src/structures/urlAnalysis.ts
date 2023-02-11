@@ -14,6 +14,7 @@ import type { PopulatedRequest, RawCertificate, RawResponse, RawUrlAnalysis } fr
 import { convertCert, parseInfoAccess, parseIssuer, parseSubject, parseSubjectAltName } from '@utils/certUtils.js';
 import { formatHTTPRequest, formatHTTPResponse } from '@utils/formatReq.js';
 import { generateCompoundSnowflake, generateSnowflake } from '@utils/idUtils.js';
+import { findArtifact } from '@utils/lighthouse.js';
 import { allowedResourceTypes, REGEXES, TableWorkerIdentifiers } from 'constants.js';
 import lighthouse from 'lighthouse';
 import getMetaData from 'metadata-scraper';
@@ -150,7 +151,27 @@ export default class UrlAnalysis {
 			logLevel: 'error',
 		});
 
-		if (!lh_analysis) return;
+		if (!lh_analysis) {
+			this.lhReport = {
+				scores: {
+					performance: null,
+					accessibility: null,
+					'best-practices': null,
+					seo: null,
+					pwa: null,
+				},
+				audits: {
+					'best-practices': {},
+					performance: {},
+					accessibility: {},
+					seo: {},
+					pwa: {},
+				},
+			} as LightHouseReport;
+			return;
+		}
+
+		console.log(lh_analysis);
 
 		const partial: {
 			audits: Partial<LightHouseReport['audits']>;
@@ -159,25 +180,41 @@ export default class UrlAnalysis {
 			scores: {
 				performance: lh_analysis.lhr.categories?.performance?.score ?? null,
 				accessibility: lh_analysis.lhr.categories?.accessibility?.score ?? null,
-				'best-practices': lh_analysis.lhr.categories?.bestPractices?.score ?? null,
+				'best-practices': lh_analysis.lhr.categories?.['best-practices']?.score ?? null,
 				seo: lh_analysis.lhr.categories?.seo?.score ?? null,
 				pwa: lh_analysis.lhr.categories?.pwa?.score ?? null,
 			},
-			audits: {},
+			audits: {
+				'best-practices': {},
+				performance: {},
+				accessibility: {},
+				seo: {},
+				pwa: {},
+			},
 		};
 
 		for (const [key, value] of Object.entries(lh_analysis.lhr.categories)) {
 			const audits = value.auditRefs.map((audit) => {
 				const auditData = lh_analysis.lhr.audits[audit.id];
 
+				const extra = findArtifact(audit.id, lh_analysis.artifacts);
+
 				return {
 					id: audit.id,
 					score: auditData?.score ?? null,
 					group: audit.group ?? null,
+					extra,
 				};
 			});
 
-			Reflect.set(partial.audits, key, audits);
+			for (const audit of audits) {
+				partial.audits[key as keyof (typeof partial)['audits']]![audit.id] = {
+					id: audit.id,
+					score: audit.score,
+					group: audit.group,
+					extra: audit.extra,
+				};
+			}
 		}
 
 		this.lhReport = partial as LightHouseReport;
@@ -381,7 +418,7 @@ export default class UrlAnalysis {
 			certificate_id: this.certificate_id!,
 			id: this.id,
 			requests_ids: this.requests_ids,
-			lh_report: this.lhReport,
+			lighthouse_analysis: this.lhReport,
 		});
 
 		this.dbResult = dbResult;
@@ -432,7 +469,6 @@ export default class UrlAnalysis {
 		}
 
 		return {
-			...result,
 			authorId: result.author_id,
 			contactedDomains: result.contacted_domains,
 			consoleOutput: result.console_output,
@@ -441,7 +477,18 @@ export default class UrlAnalysis {
 			urlsFound: result.urls_found,
 			certificate: result.certificate!,
 			requests: result.requests!,
-			lhReport: result.lh_report!,
+			lighthouseAnalysis: result.lighthouse_analysis!,
+			body: result.body,
+			certificate_id: result.certificate_id,
+			cookies: result.cookies,
+			created_at: result.created_at,
+			dns: result.dns,
+			id: result.id,
+			metadata: result.metadata,
+			requests_ids: result.requests_ids,
+			screenshot: result.screenshot,
+			updated_at: result.updated_at,
+			url: result.url,
 		};
 	}
 }

@@ -168,7 +168,7 @@ export interface UrlAnalysisResult extends BaseProps {
 	cookies: Protocol.Network.Cookie[];
 	dns: Record<string, string[]>;
 	effectiveUrl: string;
-	lhReport: LightHouseReport;
+	lighthouseAnalysis: LightHouseReport;
 	metadata: Record<string, unknown>;
 	requests: PopulatedRequest[];
 	requests_ids: string[];
@@ -178,48 +178,27 @@ export interface UrlAnalysisResult extends BaseProps {
 	urlsFound: string[];
 }
 
+type LightHouseAudits = Record<
+	string,
+	{
+		extra: {
+			fix: string | null;
+			impact: 'critical' | 'minor' | 'moderate' | 'serious' | null;
+			type: 'incomplete' | 'notApplicable' | 'passes' | 'violations';
+		} | null;
+		group: string | null;
+		id: string;
+		score: number | null;
+	}
+>;
+
 export interface LightHouseReport {
 	audits: {
-		accessibility: Record<
-			string,
-			{
-				group: string;
-				id: string;
-				score: number | null;
-			}
-		>;
-		'best-practices': Record<
-			string,
-			{
-				group: string;
-				id: string;
-				score: number | null;
-			}
-		>;
-		performance: Record<
-			string,
-			{
-				group: string;
-				id: string;
-				score: number | null;
-			}
-		>;
-		pwa: Record<
-			string,
-			{
-				group: string;
-				id: string;
-				score: number | null;
-			}
-		>;
-		seo: Record<
-			string,
-			{
-				group: string;
-				id: string;
-				score: number | null;
-			}
-		>;
+		accessibility: LightHouseAudits;
+		'best-practices': LightHouseAudits;
+		performance: LightHouseAudits;
+		pwa: LightHouseAudits;
+		seo: LightHouseAudits;
 	};
 	scores: {
 		accessibility: number | null;
