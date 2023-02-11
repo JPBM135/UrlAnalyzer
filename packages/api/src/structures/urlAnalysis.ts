@@ -1,5 +1,6 @@
 import { X509Certificate } from 'node:crypto';
 import { resolve } from 'node:dns/promises';
+import process from 'node:process';
 import { URL } from 'node:url';
 import { createCertificateDetails } from '@database/certificate_details/createCertDetails.js';
 import { getCertificateDetails } from '@database/certificate_details/getCertDetails.js';
@@ -18,6 +19,7 @@ import { findArtifact } from '@utils/lighthouse.js';
 import { allowedResourceTypes, REGEXES, TableWorkerIdentifiers } from 'constants.js';
 import lighthouse from 'lighthouse';
 import getMetaData from 'metadata-scraper';
+import { Counter, Histogram } from 'prom-client';
 import type { Page, Protocol, Browser, CDPSession, HTTPResponse, HTTPRequest } from 'puppeteer';
 import { kCache, kImgur, kPuppeteer } from 'tokens.js';
 import { container } from 'tsyringe';
@@ -29,6 +31,25 @@ import type {
 	UrlAnalysisResult,
 	UrlSecurityDetails,
 } from 'types/types.js';
+
+const scansMetrics = new Counter({
+	name: 'url_analyzer_scans_total',
+	help: 'Total number of scans',
+	labelNames: ['domain'],
+});
+
+const requestsMetrics = new Counter({
+	name: 'url_analyzer_requests_total',
+	help: 'Total number of requests',
+	labelNames: ['domain'],
+});
+
+const processingTime = new Histogram({
+	name: 'url_analyzer_processing_time',
+	help: 'Time it took to process a scan',
+	labelNames: ['domain'],
+	buckets: [1_000, 5_000, 10_000, 30_000, 60_000],
+});
 
 export default class UrlAnalysis {
 	public browser: Browser;
@@ -77,6 +98,8 @@ export default class UrlAnalysis {
 
 	private dbResult: RawUrlAnalysis | null = null;
 
+	private startTime: [number, number] = process.hrtime();
+
 	public constructor(url: string, owner_id: string | null) {
 		this.browser = container.resolve<Browser>(kPuppeteer);
 
@@ -94,6 +117,8 @@ export default class UrlAnalysis {
 		this.urlsFound = [];
 
 		this._promises = [];
+
+		scansMetrics.inc({ domain: new URL(url).hostname });
 	}
 
 	public async navigate() {
@@ -330,6 +355,10 @@ export default class UrlAnalysis {
 			const request = await this.addAndResolvePromise(formatHTTPRequest(response.request()));
 			request.response = await this.addAndResolvePromise(formatHTTPResponse(response));
 
+			requestsMetrics.inc({
+				domain: new URL(request.url).hostname,
+			});
+
 			const resource_type_allowed = allowedResourceTypes.includes(
 				request.resource_type as ReturnType<HTTPRequest['resourceType']>,
 			);
@@ -422,6 +451,11 @@ export default class UrlAnalysis {
 		});
 
 		this.dbResult = dbResult;
+
+		const domain = new URL(this.url).hostname;
+		const timeTook = process.hrtime(this.startTime);
+
+		processingTime.labels(domain).observe((timeTook[0] * 1e9 + timeTook[1]) / 1e6);
 
 		return UrlAnalysis.createFromDbResult(this.dbResult!, {
 			certificate: this.certificate!,
