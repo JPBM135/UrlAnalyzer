@@ -47,7 +47,7 @@ export default function ScanPage() {
 				</div>
 			) : error ? (
 				<div className="flex justify-between h-full flex-col items-center gap-72">
-					<div className="flex justify-center items-center m-20 text-5xl font-bold font-sans p-4 bg-gray-100 rounded-xl text-center text-gray-600 gap-4">
+					<div className="flex justify-center items-center w-2/3 m-20 text-5xl font-bold font-sans p-4 bg-gray-100 rounded-xl text-center text-gray-600 gap-4">
 						<BiErrorAlt className="fast-animate-pulse" color="red" size={64} />
 						{error}
 					</div>
@@ -58,7 +58,7 @@ export default function ScanPage() {
 				</div>
 			) : (
 				<div className="flex justify-between h-full flex-col items-center gap-72">
-					<div className="flex justify-center items-center m-20 text-5xl font-bold font-sans bg-gray-100 rounded-xl text-center text-gray-600">
+					<div className="flex justify-center w-2/3 items-center m-20 text-5xl font-bold font-sans bg-gray-100 rounded-xl text-center text-gray-600">
 						<LoadingSpin />
 						Processing your request...
 					</div>
