@@ -1,11 +1,11 @@
-import type { SafeSession } from './database.js';
+import type { RawUrlAnalysis, SafeSession } from './database.js';
 import type { HttpErrorCodes, HttpStatusCode } from './errorCodes.js';
 import type { UrlAnalysisResult } from './types.js';
 import type { If } from './utils.js';
 
 // General
 export interface ErrorBody {
-	code: HttpErrorCodes;
+	code: keyof typeof HttpErrorCodes;
 	description: HttpErrorCodes | string;
 	message: HttpStatusCode;
 	status: HttpStatusCode;
@@ -52,3 +52,8 @@ export interface POSTScanResultEndpointBody {
 }
 
 export type GETScanEndpointReturn = GeneralEndpointReturn<UrlAnalysisResult>;
+
+export type GETRecentScanEndpointReturn = GeneralPaginatedEndpointReturn<{
+	count: number;
+	data: RawUrlAnalysis[];
+}>;

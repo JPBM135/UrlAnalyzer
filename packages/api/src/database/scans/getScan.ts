@@ -12,3 +12,30 @@ export async function getScan(scan_id: string): Promise<RawUrlAnalysis> {
 
 	return result;
 }
+
+export async function getRecent(
+	limit: number,
+	offSet: number,
+): Promise<{
+	count: number;
+	data: RawUrlAnalysis[];
+}> {
+	const sql = container.resolve<Sql<any>>(kSQL);
+
+	const results = await sql<[RawUrlAnalysis]>`
+		select * from url_analysis order by created_at desc limit ${limit} offset ${offSet}
+	`;
+
+	return {
+		data: results,
+		count: (
+			await sql<
+				[
+					{
+						count: number;
+					},
+				]
+			>`select count(*) from url_analysis`
+		)[0].count,
+	};
+}
