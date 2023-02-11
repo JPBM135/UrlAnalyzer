@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
 	return (
-		<main className="flex flex-col justify-evenly p-64">
+		<main className="flex flex-col justify-evenly px-64 pb-64 pt-10">
 			<div className="flex flex-col bg-gray-800 rounded p-8 gap-5 font-sans text-white">
 				<div className="text-5xl font-bold">Privacy Policy</div>
 				<p>Last updated: February 11, 2023</p>
