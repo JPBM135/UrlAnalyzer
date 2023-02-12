@@ -1,5 +1,7 @@
+import process from 'node:process';
+
 export async function makeApiRequest<T>(path: string, options: RequestInit = {}) {
-	const res = await fetch(`http://localhost:3232/api/v1${path}`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
 		headers: {
 			'Content-Type': 'application/json',
 		},
