@@ -6,6 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
+		"prod": "sudo env-cmd node server.mjs",
 		"lint": "next lint"
 	},
 	"dependencies": {
@@ -13,6 +14,7 @@
 		"@types/node": "18.11.18",
 		"@types/react": "18.0.27",
 		"@types/react-dom": "18.0.10",
+		"env-cmd": "^10.1.0",
 		"highlight.js": "^11.7.0",
 		"next": "13.1.5",
 		"prettier": "^2.8.4",
