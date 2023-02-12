@@ -3,12 +3,9 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"api:dev": "yarn workspace url_analyzer_api run start:dev",
+		"api:dev": "yarn workspace url_analyzer_api run dev",
 		"client:dev": "yarn workspace url_analyzer_app run dev",
 		"start:dev": "yarn api:dev & yarn client:dev",
-		"build": "yarn workspaces foreach --parallel --topological run build",
-		"dev": "yarn workspaces foreach --parallel --topological run dev",
-		"start": "yarn workspaces foreach --parallel --topological run start",
 		"lint": "prettier --check . && eslint . ",
 		"format": "prettier --write . && eslint . --fix"
 	},
