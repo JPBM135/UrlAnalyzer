@@ -18,8 +18,8 @@ import { kExpress } from '../tokens.js';
 export function createExpressApp() {
 	const app = express();
 
-	const cert = readFileSync(new URL('../../../../selfsigned.crt', import.meta.url));
-	const key = readFileSync(new URL('../../../../selfsigned.key', import.meta.url));
+	const cert = readFileSync(new URL('../../../../url_analyzer_selfsigned.crt', import.meta.url));
+	const key = readFileSync(new URL('../../../../url_analyzer_selfsigned.key', import.meta.url));
 
 	const credentials = {
 		cert,
