@@ -10,7 +10,7 @@
 			"preLaunchTask": "build",
 			"name": "Launch Program",
 			"envFile": "${workspaceFolder}/packages/api/.env",
-			"program": "${workspaceFolder}/packages/api/dist/index.js",
+			"program": "${workspaceFolder}/packages/api/dist/index.js"
 		}
 	]
 }

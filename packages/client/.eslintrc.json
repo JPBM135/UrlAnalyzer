@@ -18,22 +18,16 @@
 	"parserOptions": {
 		"project": "./tsconfig.eslint.json"
 	},
-	"ignorePatterns": [
-		"**/dist/*"
-	],
+	"ignorePatterns": ["**/dist/*"],
 	"rules": {
 		"react/react-in-jsx-scope": 0,
 		"react/jsx-filename-extension": [
 			1,
 			{
-				"extensions": [
-					".tsx"
-				]
+				"extensions": [".tsx"]
 			}
 		],
-		"@typescript-eslint/consistent-type-definitions": [
-			"error",
-			"interface"
-		]
+		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+		"no-html-link-for-pages": 0
 	}
 }

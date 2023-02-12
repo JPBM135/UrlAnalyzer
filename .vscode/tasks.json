@@ -5,11 +5,7 @@
 			"label": "build",
 			"type": "shell",
 			"command": "cd",
-			"args": [
-				"packages/api;",
-				"yarn",
-				"build"
-			],
+			"args": ["packages/api;", "yarn", "build"],
 			"group": "build",
 			"presentation": {
 				"reveal": "always"

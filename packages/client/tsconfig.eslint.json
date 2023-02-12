@@ -1,10 +1,4 @@
 {
 	"extends": "../../tsconfig.eslint.json",
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"server.mjs"
-	]
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "server.mjs"]
 }

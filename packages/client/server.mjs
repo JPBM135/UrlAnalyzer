@@ -13,7 +13,7 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-console.log(process.env)
+console.log(process.env);
 
 void app.prepare().then(() => {
 	if (dev) {

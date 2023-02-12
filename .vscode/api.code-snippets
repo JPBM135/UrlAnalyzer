@@ -65,13 +65,7 @@
 	"RouteTryCatch": {
 		"scope": "typescript",
 		"prefix": "routeTryCatch",
-		"body": [
-			"try {",
-			"",
-			"} catch (error) {",
-			"\terrorResponse(HttpError.fromError(error as Error), res);",
-			"}"
-		],
+		"body": ["try {", "", "} catch (error) {", "\terrorResponse(HttpError.fromError(error as Error), res);", "}"],
 		"description": "RouteTryCatch"
 	}
 }
