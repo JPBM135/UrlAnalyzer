@@ -1,4 +1,4 @@
-import process from 'node:process';
+import process from 'process';
 
 export async function makeApiRequest<T>(path: string, options: RequestInit = {}) {
 	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
