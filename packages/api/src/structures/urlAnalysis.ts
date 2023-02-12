@@ -33,22 +33,22 @@ import type {
 } from 'types/types.js';
 
 const scansMetrics = new Counter({
-	name: 'url_analyzer_scans_total',
+	name: 'url_analyzer_api_scans_total',
 	help: 'Total number of scans',
 	labelNames: ['domain'],
 });
 
 const requestsMetrics = new Counter({
-	name: 'url_analyzer_requests_total',
+	name: 'url_analyzer_api_requests_total',
 	help: 'Total number of requests',
 	labelNames: ['domain'],
 });
 
 const processingTime = new Histogram({
-	name: 'url_analyzer_processing_time',
+	name: 'url_analyzer_api_processing_time',
 	help: 'Time it took to process a scan',
 	labelNames: ['domain'],
-	buckets: [1_000, 5_000, 10_000, 30_000, 60_000],
+	buckets: [0.1, 0.5, 1, 2, 5],
 });
 
 export default class UrlAnalysis {
@@ -195,7 +195,7 @@ export default class UrlAnalysis {
 			} as LightHouseReport;
 			return;
 		}
-		
+
 		const partial: {
 			audits: Partial<LightHouseReport['audits']>;
 			scores: LightHouseReport['scores'];
