@@ -195,9 +195,7 @@ export default class UrlAnalysis {
 			} as LightHouseReport;
 			return;
 		}
-
-		console.log(lh_analysis);
-
+		
 		const partial: {
 			audits: Partial<LightHouseReport['audits']>;
 			scores: LightHouseReport['scores'];
