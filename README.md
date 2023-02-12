@@ -60,7 +60,14 @@ Visit <http://localhost:3000> in your browser to access the app.
 
 ## Examples
 
-- Analyze the URL <https://www.example.com>
+### Analyzing the URL <https://www.example.com>
+
+- Main Page
+![image](https://user-images.githubusercontent.com/67063134/218296194-c697546d-5e9c-4d21-a7ef-5430ef4910cc.png)
+
+- Score and Analysis
+![image](https://user-images.githubusercontent.com/67063134/218296189-b1cfc5d9-0217-40fa-a185-70d175e21031.png)
+
 
 - Store the results for later access
 
