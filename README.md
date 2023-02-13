@@ -84,6 +84,7 @@ If you are still encountering problems, please open an issue on the repository w
 - Reduce the size of the analysis results
 - Add tests to the project (beyond github actions)
 - Add support for [IOK](https://github.com/phish-report/IOK) and related projects
+- Add support for [Facebook Threat Exchange](https://developers.facebook.com/docs/threat-exchange)
 
 ## Contributing
 
