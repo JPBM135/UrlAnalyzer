@@ -14,22 +14,24 @@ import type { Request, Response } from 'express';
 import { google } from 'googleapis';
 import logger from 'logger.js';
 
+const mainSite = resolveEnv('MAIN_SITE_BASEURL');
+
 export async function googleOAuthCallbackHandler(req: Request, res: Response): Promise<void> {
 	try {
 		const { code, state } = req.query;
 
 		if (!(await validateState(Providers.Google, (state as string)!))) {
-			res.redirect('http://localhost:3000/login?error=invalid_state');
+			res.redirect(`${mainSite}/login?error=invalid_state`);
 			return;
 		}
 
 		if (typeof code !== 'string') {
-			res.redirect('http://localhost:3000/login?error=invalid_code');
+			res.redirect(`${mainSite}/login?error=invalid_code`);
 			return;
 		}
 
 		if (Reflect.has(req.query, 'error') && Reflect.get(req.query, 'error') === 'access_denied') {
-			res.redirect('http://localhost:3000/login?error=access_denied');
+			res.redirect(`${mainSite}/login?error=access_denied`);
 			return;
 		}
 
@@ -48,14 +50,14 @@ export async function googleOAuthCallbackHandler(req: Request, res: Response): P
 
 			switch (tokenReqStatus) {
 				case HttpStatusCode.BadRequest:
-					res.redirect('http://localhost:3000/login?error=invalid_code');
+					res.redirect(`${mainSite}/login?error=invalid_code`);
 					return;
 				case HttpStatusCode.Unauthorized:
 				case HttpStatusCode.Forbidden:
-					res.redirect('http://localhost:3000/login?error=invalid_client');
+					res.redirect(`${mainSite}/login?error=invalid_client`);
 					return;
 				default:
-					res.redirect('http://localhost:3000/login?error=unknown_error');
+					res.redirect(`${mainSite}/login?error=unknown_error`);
 					return;
 			}
 		}
@@ -75,7 +77,7 @@ export async function googleOAuthCallbackHandler(req: Request, res: Response): P
 
 		if (!validateStatusCode(dataReqStatus)) {
 			logger.error('Google OAuth2 userinfo request failed', { status: dataReqStatus, body: data });
-			res.redirect('http://localhost:3000/login?error=unknown_error');
+			res.redirect(`${mainSite}/login?error=unknown_error`);
 			return;
 		}
 
@@ -101,7 +103,7 @@ export async function googleOAuthCallbackHandler(req: Request, res: Response): P
 			}),
 		]);
 
-		res.redirect(`http://localhost:3000/login?session=${session.token}&user=${user.id}$provider=${Providers.Google}`);
+		res.redirect(`${mainSite}/login?session=${session.token}&user=${user.id}$provider=${Providers.Google}`);
 	} catch (error) {
 		errorResponse(HttpError.fromError(error as Error), res);
 	}

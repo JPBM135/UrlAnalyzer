@@ -16,22 +16,24 @@ import type { Request, Response } from 'express';
 import logger from 'logger.js';
 import { request } from 'undici';
 
+const mainSite = resolveEnv('MAIN_SITE_BASEURL');
+
 export async function discordCallbackHandler(req: Request, res: Response): Promise<void> {
 	try {
 		const { code, state } = req.query;
 
 		if (!(await validateState(Providers.Discord, (state as string)!))) {
-			res.redirect('http://localhost:3000/login?error=invalid_state');
+			res.redirect(`${mainSite}/login?error=invalid_state`);
 			return;
 		}
 
 		if (typeof code !== 'string') {
-			res.redirect('http://localhost:3000/login?error=invalid_code');
+			res.redirect(`${mainSite}/login?error=invalid_code`);
 			return;
 		}
 
 		if (Reflect.has(req.query, 'error') && Reflect.get(req.query, 'error') === 'access_denied') {
-			res.redirect('http://localhost:3000/login?error=access_denied');
+			res.redirect(`${mainSite}/login?error=access_denied`);
 			return;
 		}
 
@@ -57,14 +59,14 @@ export async function discordCallbackHandler(req: Request, res: Response): Promi
 
 			switch (tokenReq.statusCode) {
 				case HttpStatusCode.BadRequest:
-					res.redirect('http://localhost:3000/login?error=invalid_code');
+					res.redirect(`${mainSite}/login?error=invalid_code`);
 					return;
 				case HttpStatusCode.Unauthorized:
 				case HttpStatusCode.Forbidden:
-					res.redirect('http://localhost:3000/login?error=invalid_client');
+					res.redirect(`${mainSite}/login?error=invalid_client`);
 					return;
 				default:
-					res.redirect('http://localhost:3000/login?error=unknown_error');
+					res.redirect(`${mainSite}/login?error=unknown_error`);
 					return;
 			}
 		}
@@ -84,7 +86,7 @@ export async function discordCallbackHandler(req: Request, res: Response): Promi
 				body: await userReq.body.text(),
 			});
 
-			res.redirect('http://localhost:3000/login?error=unknown_error');
+			res.redirect(`${mainSite}/login?error=unknown_error`);
 			return;
 		}
 
@@ -112,7 +114,7 @@ export async function discordCallbackHandler(req: Request, res: Response): Promi
 			}),
 		]);
 
-		res.redirect(`http://localhost:3000/login?session=${session.token}&user=${user.id}$provider=${Providers.Discord}`);
+		res.redirect(`${mainSite}/login?session=${session.token}&user=${user.id}$provider=${Providers.Discord}`);
 	} catch (error) {
 		errorResponse(HttpError.fromError(error as Error), res);
 	}
