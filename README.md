@@ -1,4 +1,4 @@
-# Url-Analyzer
+# Url-Analyzer [![Tests](https://github.com/Url-Analyzer/UrlAnalyzer/actions/workflows/tests.yml/badge.svg)](https://github.com/Url-Analyzer/UrlAnalyzer/actions/workflows/tests.yml)
 
 A tool to analyze any URL and get in-depth information about it. With the app, you can access information such as general info, requests data exchanged between the client and server, and an in-depth analysis of the site provided by the Google Lighthouse tool. The results can be stored for later access.
 
