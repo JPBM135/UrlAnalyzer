@@ -190,3 +190,7 @@ dist
 .vercel
 
 .vscode/find-unused-exports.json
+
+# data
+packages/api/data/cache
+packages/api/data/IOK/*

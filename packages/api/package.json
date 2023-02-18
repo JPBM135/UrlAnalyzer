@@ -13,7 +13,9 @@
 		"format": "prettier --write . && eslint src --ext ts --fix",
 		"dev": "env-cmd node --enable-source-maps dist/index.js",
 		"start": "next start",
-		"migrate": "env-cmd ley"
+		"migrate": "env-cmd ley",
+		"test:dev": "vitest dev",
+		"test": "vitest run"
 	},
 	"main": "dist/index.js",
 	"author": "JPBM135 <jpedrobm0@gmail.com>",
@@ -31,7 +33,8 @@
 		"env-cmd": "^10.1.0",
 		"ley": "^0.8.1",
 		"tsc-alias": "^1.8.2",
-		"typescript": "^4.9.4"
+		"typescript": "^4.9.4",
+		"vite": "^4.1.2"
 	},
 	"dependencies": {
 		"@sapphire/snowflake": "^3.4.0",
@@ -53,6 +56,9 @@
 		"raw-body": "^2.5.1",
 		"reflect-metadata": "^0.1.13",
 		"tsyringe": "^4.7.0",
-		"undici": "^5.16.0"
+		"undici": "^5.16.0",
+		"vite-tsconfig-paths": "^4.0.5",
+		"vitest": "^0.28.5",
+		"yaml": "^2.2.1"
 	}
 }
