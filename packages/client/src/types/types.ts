@@ -1,4 +1,5 @@
-import type { ConsoleMessageType, JSHandle, Protocol } from 'puppeteer';
+import type { IOKRule } from '@functions/iok/types.js';
+import type { ConsoleMessageType, JSHandle, Protocol, ResourceType } from 'puppeteer';
 import type { BaseProps, PopulatedRequest, RawCertificate } from './database.js';
 import type {
 	PlatformType,
@@ -103,7 +104,7 @@ export interface RequestResult {
 	nonce?: string;
 	post_data: string | undefined;
 	redirect_chain: RequestResult[];
-	resource_type: string;
+	resource_type: ResourceType;
 	response: ResponseResult | null;
 	url: string;
 }
@@ -127,6 +128,7 @@ export interface Screenshot {
 }
 
 export interface UrlSecurityDetails {
+	IOK: IOKRule[];
 	safeBrowsing: SafeBrowsing[];
 	transparencyReport: TransparencyReport | null;
 }
