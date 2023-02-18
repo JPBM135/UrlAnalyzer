@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { parseIOKRules } from '@functions/iok/parseIOKRules.js';
 import { createCache } from 'container/cache.js';
 import { createRouter } from 'routes/index.js';
 import { createExpressApp } from './container/express.js';
@@ -24,8 +25,10 @@ logger.success('Postgres client created');
 createImgurClient();
 logger.success('Imgur client created');
 
-createCache();
+await createCache();
 logger.success('Cache created');
+
+await parseIOKRules();
 
 await createPuppeteerBrowser();
 logger.success('Puppeteer browser created');

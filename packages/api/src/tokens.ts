@@ -5,3 +5,4 @@ export const kPrometheus = Symbol('kPrometheus');
 export const kPuppeteer = Symbol('kPuppeteer');
 export const kImgur = Symbol('kImgur');
 export const kCache = Symbol('kCache');
+export const kIOKRules = Symbol('kIOKRules');
