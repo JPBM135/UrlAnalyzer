@@ -9,6 +9,7 @@ import { getRequestsByParentId } from '@database/requests/getRequest.js';
 import { createResponse } from '@database/responses/createResponse.js';
 import { getResponsesByParentId } from '@database/responses/getResponse.js';
 import { createUrlAnalysis } from '@database/scans/createScan.js';
+import { matchAgainstIOK } from '@functions/iok/matchResult.js';
 import type Imgur from '@functions/services/Imgur.js';
 import { checkUrlSafeBrowsing, checkUrlTransparencyReport } from '@functions/services/SafeBrowsing.js';
 import type { PopulatedRequest, RawCertificate, RawResponse, RawUrlAnalysis } from '@types';
@@ -143,7 +144,6 @@ export default class UrlAnalysis {
 				this.screenshot(),
 				this.resolveDns(),
 				this.getCertificate(client, pageResponse!),
-				this.securityDetails(),
 				this.lightHouse(),
 			]);
 
@@ -402,6 +402,10 @@ export default class UrlAnalysis {
 		this.security = {
 			safeBrowsing,
 			transparencyReport,
+			IOK: matchAgainstIOK({
+				requests: this.requests,
+				cookies: this.cookies,
+			}),
 		};
 	}
 
@@ -428,6 +432,8 @@ export default class UrlAnalysis {
 		}
 
 		await Promise.all([this.page!.close(), ...this._promises]);
+
+		await this.securityDetails();
 
 		const dbResult = await createUrlAnalysis({
 			author_id: this.author_id,

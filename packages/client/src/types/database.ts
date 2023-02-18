@@ -1,5 +1,5 @@
 /* eslint-disable typescript-sort-keys/interface */
-import type { Protocol } from 'puppeteer';
+import type { Protocol, ResourceType } from 'puppeteer';
 import type { ConsoleOutput, LightHouseReport, RequestResult, Screenshot, UrlSecurityDetails } from './types.js';
 import type { OmitBaseProps, OmitBasePropsAndMore } from './utils.js';
 
@@ -118,7 +118,7 @@ export interface RawRequest extends BaseProps {
 	nonce: string | null | undefined;
 	post_data: string | null | undefined;
 	redirect_chain: RequestResult[];
-	resource_type: string;
+	resource_type: ResourceType;
 	response_id: string;
 	url: string;
 }
