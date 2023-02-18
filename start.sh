@@ -46,3 +46,17 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes -keyout url_analyze
 echo "[OPEN-SSL]: Certificates generated"
 
 echo "======================================================================"
+echo "[Git]: Downloading the IOK ruleset..."
+git clone https://github.com/phish-report/IOK.git packages/api/data/cache
+cd packages/api/data/cache
+echo "[Git]: Copying the IOK ruleset to the API..."
+cp -r indicators/* ../iok
+echo "[Git]: IOK ruleset downloaded"
+
+echo "[Git]: Deleting cache..."
+cd ..
+rm -rf cache
+echo "[Git]: Cache deleted"
+
+
+echo "======================================================================"
