@@ -3,7 +3,7 @@ import { HttpError } from '@structures/httpError.js';
 import UrlAnalysis from '@structures/urlAnalysis.js';
 import type { GETRecentScanEndpointReturn, GETScanEndpointReturn } from '@types';
 import { HttpStatusCode } from '@types';
-import { errorResponse, sendResponse } from '@utils/respond.js';
+import { CacheType, errorResponse, sendResponse } from '@utils/respond.js';
 import { OP_DELIMITER } from 'constants.js';
 import type { Request, Response } from 'express';
 import type { Redis } from 'ioredis';
@@ -28,7 +28,7 @@ export async function getScanHandler(req: Request, res: Response): Promise<void>
 			await redis.del(`url_analysis${OP_DELIMITER}${scan_id}`);
 
 			if (result.ok) {
-				sendResponse<GETScanEndpointReturn>(result.data!, res);
+				sendResponse<GETScanEndpointReturn>(result.data!, res, CacheType.Gigantic);
 			} else {
 				throw new HttpError(HttpStatusCode.BadRequest, 'NavigationFailed', result.error);
 			}
@@ -46,9 +46,9 @@ export async function getScanHandler(req: Request, res: Response): Promise<void>
 			throw new HttpError(HttpStatusCode.NotFound, 'NotFound', 'Analysis not found');
 		}
 
-		sendResponse<GETScanEndpointReturn>(await UrlAnalysis.createFromDbResult(dbResult), res);
+		sendResponse<GETScanEndpointReturn>(await UrlAnalysis.createFromDbResult(dbResult), res, CacheType.Gigantic);
 	} catch (error) {
-		errorResponse(HttpError.fromError(error as Error), res);
+		errorResponse(HttpError.fromError(error as Error), res, CacheType.NoStore);
 	}
 }
 
