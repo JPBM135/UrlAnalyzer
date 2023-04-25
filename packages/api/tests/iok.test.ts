@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { expect, it } from 'vitest';
-import { type ConditionReturn, parseCondition, matchConditions } from '../src/functions/iok/conditionParser.js';
+import { parseCondition, matchConditions } from '../src/functions/iok/conditionParser.js';
 import { matchCheckRule } from '../src/functions/iok/matchResult.js';
 import { parseIOKRule, parseLocalIOKRules } from '../src/functions/iok/parseIOKRules.js';
 
@@ -74,6 +74,7 @@ it('Should parse simple conditions', () => {
 	expect(parseCondition(condition)).toEqual<ConditionReturn>({
 		type: 'and',
 		conditions: [/^one$/, /^two$/, /^three$/],
+		amount: null,
 	});
 
 	const condition2 = 'one or two or three';
@@ -81,6 +82,7 @@ it('Should parse simple conditions', () => {
 	expect(parseCondition(condition2)).toEqual<ConditionReturn>({
 		type: 'or',
 		conditions: [/^one$/, /^two$/, /^three$/],
+		amount: null,
 	});
 
 	const nestedCondition = 'one and (two or three)';
@@ -91,9 +93,11 @@ it('Should parse simple conditions', () => {
 			{
 				type: 'or',
 				conditions: [/^two$/, /^three$/],
+				amount: null,
 			},
 			/^one$/,
 		],
+		amount: null,
 	});
 });
 
@@ -106,10 +110,12 @@ it('Should parse complex conditions', () => {
 			{
 				type: 'or',
 				conditions: [/^two$/, /^three$/],
+				amount: null,
 			},
 			/^one$/,
 			/^four$/,
 		],
+		amount: null,
 	});
 
 	const doubleNestedCondition = '(one and two) or (three and four)';
@@ -120,12 +126,15 @@ it('Should parse complex conditions', () => {
 			{
 				type: 'and',
 				conditions: [/^one$/, /^two$/],
+				amount: null,
 			},
 			{
 				type: 'and',
 				conditions: [/^three$/, /^four$/],
+				amount: null,
 			},
 		],
+		amount: null,
 	});
 });
 
@@ -135,6 +144,7 @@ it('Should parse glob conditions', () => {
 	expect(parseCondition(globCondition)).toEqual<ConditionReturn>({
 		type: 'and',
 		conditions: [/^one$/, /^two$/, /^.*\.js$/],
+		amount: null,
 	});
 
 	const globCondition2 = 'one and per*';
@@ -142,6 +152,7 @@ it('Should parse glob conditions', () => {
 	expect(parseCondition(globCondition2)).toEqual<ConditionReturn>({
 		type: 'and',
 		conditions: [/^one$/, /^per.*$/],
+		amount: null,
 	});
 });
 
@@ -154,10 +165,12 @@ it('Should parse glob conditions with nested conditions', () => {
 			{
 				type: 'or',
 				conditions: [/^two$/, /^three$/],
+				amount: null,
 			},
 			/^one$/,
 			/^.*\.js$/,
 		],
+		amount: null,
 	});
 
 	const globCondition4 = 'one and (per* or *.js)';
@@ -168,9 +181,11 @@ it('Should parse glob conditions with nested conditions', () => {
 			{
 				type: 'or',
 				conditions: [/^per.*$/, /^.*\.js$/],
+				amount: null,
 			},
 			/^one$/,
 		],
+		amount: null,
 	});
 });
 
@@ -207,6 +222,31 @@ it('Should match glob conditions', () => {
 	const globCondition2 = parseCondition('one and per*');
 
 	expect(matchConditions(globCondition2, new Set(['one', 'person.js']))).toBe(true);
+});
+
+it('Should match glob conditions with nested conditions', () => {
+	const globCondition3 = parseCondition('one and (two or three) and *.js');
+
+	expect(matchConditions(globCondition3, new Set(['one', 'two', 'file.js']))).toBe(true);
+
+	const globCondition4 = parseCondition('one and (per* or *.js)');
+
+	expect(matchConditions(globCondition4, new Set(['one', 'person']))).toBe(true);
+	expect(matchConditions(globCondition4, new Set(['one', 'file.js']))).toBe(true);
+});
+
+it('Should match 1 of x conditions', () => {
+	const condition = parseCondition('1 of *.js');
+
+	console.log(condition);
+
+	expect(matchConditions(condition, new Set(['file.js']))).toBe(true);
+	expect(matchConditions(condition, new Set(['lol']))).toBe(false);
+
+	const condition2 = parseCondition('2 of *.js');
+
+	expect(matchConditions(condition2, new Set(['file.js']))).toBe(false);
+	expect(matchConditions(condition2, new Set(['file.js', 'file2.js']))).toBe(true);
 });
 
 it('Should match the example iok file', () => {

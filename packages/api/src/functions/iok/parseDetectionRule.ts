@@ -1,5 +1,5 @@
+import type { IOKDetectionRule, IOKPrefixes, IOKSuffixes, RawIOKRule } from '../../types/iok-types.js';
 import { parseCondition } from './conditionParser.js';
-import type { IOKDetectionRule, IOKPrefixes, IOKSuffixes, RawIOKRule } from './types.js';
 
 export function parseDetection(detection: RawIOKRule['detection']): IOKDetectionRule {
 	const entries = Object.entries(detection);

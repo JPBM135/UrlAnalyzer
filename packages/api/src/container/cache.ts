@@ -1,4 +1,4 @@
-import { parseIOKRules } from '@functions/iok/parseIOKRules.js';
+import { parseLocalIOKRules } from '@functions/iok/parseIOKRules.js';
 import { kCache, kIOKRules } from 'tokens.js';
 import { container } from 'tsyringe';
 
@@ -7,7 +7,7 @@ export async function createCache() {
 
 	container.register(kCache, { useValue: cache });
 
-	const IOKRules = await parseIOKRules();
+	const IOKRules = await parseLocalIOKRules();
 
 	container.register(kIOKRules, { useValue: IOKRules });
 }
