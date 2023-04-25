@@ -21,7 +21,7 @@ export const REGEXES = {
 
 export const CEP_API_BASE_URL = 'https://cdn.apicep.com/file/apicep/' as const;
 
-export const MAX_BODY_SIZE = 100_000 as const;
+export const MAX_BODY_SIZE = 5_000_000 as const;
 
 export const TOKEN_EXPIRATION_MS = 43_200_000;
 
