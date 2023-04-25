@@ -42,7 +42,9 @@ export function createExpressApp() {
 		}),
 		// Responsible for authenticating the user
 		commonFunctionsMiddleware({
-			noAuthRoutes: ['/metrics', '/api/v1/oauth2/*', '/api/v1/scan/*'].map((route) => globToRegex(route)),
+			noAuthRoutes: ['/metrics', '/api/v1/oauth2/*', '/api/v1/scan/*', '/api/v1/formatter/*'].map((route) =>
+				globToRegex(route),
+			),
 		}),
 	];
 
