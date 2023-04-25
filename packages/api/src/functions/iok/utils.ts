@@ -1,5 +1,5 @@
 import type { Protocol } from 'puppeteer';
-import type { IOKSuffixes } from './types.js';
+import type { IOKSuffixes } from '../../types/iok-types.js';
 
 export function findBodyScript(body: string) {
 	const script = body.match(/<script[^>]*>[\S\s]*?<\/script>/g);
@@ -57,4 +57,10 @@ export function formatHeaders(headers: Record<string, string>) {
 
 export function formatCookies(cookies: Protocol.Network.Cookie[]) {
 	return cookies.map(({ name, value }) => `${name}=${value}`);
+}
+
+export function NaNCoallescing<T>(value: T | undefined, fallback: T): T {
+	if (value === 0) return value;
+
+	return value ?? fallback;
 }

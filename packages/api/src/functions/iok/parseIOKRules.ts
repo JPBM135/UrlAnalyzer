@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { parse } from 'yaml';
+import type { IOKRule, RawIOKRule } from '../../types/iok-types.js';
 import { parseDetection } from './parseDetectionRule.js';
-import type { IOKRule, RawIOKRule } from './types.js';
 
 const dataPath = new URL('../../../data/iok/', import.meta.url);
 

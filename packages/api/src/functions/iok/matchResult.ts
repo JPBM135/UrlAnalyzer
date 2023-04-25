@@ -1,8 +1,8 @@
 import { kIOKRules } from 'tokens.js';
 import { container } from 'tsyringe';
 import type { UrlAnalysisResult } from 'types/types.js';
+import type { IOKRule } from '../../types/iok-types.js';
 import { matchConditions } from './conditionParser.js';
-import type { IOKRule } from './types.js';
 import { findBodyScript, detectBasedOnType, formatHeaders, formatCookies } from './utils.js';
 
 export function matchAgainstIOK({

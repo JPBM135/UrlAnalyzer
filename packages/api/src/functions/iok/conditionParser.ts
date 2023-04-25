@@ -1,16 +1,13 @@
 import { globToRegex } from '@utils/globToRegex.js';
-
-export interface ConditionReturn {
-	conditions: (ConditionReturn | RegExp)[];
-	type: 'and' | 'or';
-}
+import type { ConditionReturn } from 'types/iok-types.js';
+import { NaNCoallescing } from './utils.js';
 
 export function parseCondition(condition: string): ConditionReturn {
 	let _condition = condition;
 
 	const nested = _condition.match(/\([^)]+\)/g);
 
-	const conditions: (ConditionReturn | RegExp | string)[] = [];
+	const conditions: (ConditionReturn | RegExp | number | string)[] = [];
 
 	if (nested) {
 		for (const nest of nested) {
@@ -21,19 +18,48 @@ export function parseCondition(condition: string): ConditionReturn {
 		}
 	}
 
-	const type = _condition.includes(' or ') ? 'or' : 'and';
+	const type = /\d\sof/.test(_condition) ? 'of' : _condition.includes(' or ') ? 'or' : 'and';
 
-	conditions.push(..._condition.split(` ${type} `).filter(Boolean).map(globToRegex));
+	if (type === 'of') {
+		const conditions = [globToRegex(_condition.replace(/\d+\sof\s/, ''))];
+		return {
+			type,
+			conditions,
+			amount: NaNCoallescing(Number(/\d+/.exec(_condition)?.[0]), null),
+		};
+	}
+
+	conditions.push(
+		..._condition
+			.split(` ${type} `)
+			.filter(Boolean)
+			.map((val) => {
+				if (/^\d+$/.test(val)) {
+					return Number(val);
+				}
+
+				return globToRegex(val);
+			}),
+	);
 
 	return {
 		type,
 		conditions: conditions as ConditionReturn['conditions'],
+		amount: null,
 	};
 }
 
-export function matchConditions({ conditions, type }: ConditionReturn, matched: Set<string>): boolean {
+export function matchConditions({ conditions, type, amount }: ConditionReturn, matched: Set<string>): boolean {
 	const matches = conditions.filter((condition) => {
 		if (condition instanceof RegExp) {
+			if (type === 'of') {
+				if (amount === null) return false;
+
+				const matchCount = [...matched].filter((match) => condition.test(match)).length;
+
+				return matchCount >= amount;
+			}
+
 			return [...matched].some((match) => condition.test(match));
 		}
 
