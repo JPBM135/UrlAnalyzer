@@ -6,23 +6,33 @@ import { UrlAnalysisResult as UrlAnalysisResultComponent } from '@app/components
 import type { GETScanEndpointReturn } from '@app/types';
 import { makeApiRequest } from '@app/utils/makeApiReq';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiErrorAlt } from 'react-icons/bi';
 import { RxDoubleArrowLeft } from 'react-icons/rx';
 
-export default function ScanPage() {
-	const search = usePathname()!;
-	const id = decodeURIComponent(search.split('/').pop()!);
+export const runtime = 'experimental-edge';
+
+export default function ScanPage({ params }: { params: { id: string } }) {
+	const { id } = params;
 
 	const [result, setResult] = useState<GETScanEndpointReturn | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
+		if (id === 'create') {
+			return;
+		}
+
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		const interval = setInterval(async () => fetch(), 5_000);
 		const fetch = async () => {
-			const res = await makeApiRequest<GETScanEndpointReturn>(`/scan/${id}`);
+			const res = await makeApiRequest<GETScanEndpointReturn>(`/scan/${id}`).catch((error_) => {
+				setError(`There was an error while processing your request: ${error_}`);
+			});
+
+			if (!res) {
+				return;
+			}
 
 			if (res.message === 'success') {
 				setResult(res);
@@ -36,6 +46,10 @@ export default function ScanPage() {
 		};
 
 		void fetch();
+
+		// On unmount clear the interval
+		return () => clearInterval(interval);
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

@@ -6,12 +6,12 @@ import './styles/globals.css';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
-			<Head />
+			<head>
+				<Head />
+			</head>
 			<body className="flex flex-col justify-between h-screen">
-				<div>
-					<Header />
-					{children}
-				</div>
+				<Header />
+				{children}
 				<Footer />
 			</body>
 		</html>

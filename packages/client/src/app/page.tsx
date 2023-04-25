@@ -1,6 +1,7 @@
 'use client';
 
 import { AnalyzerBar } from '@app/components/AnalyzerBar';
+import { useError } from '@app/functions/hooks/useError';
 import type { GETRecentScanEndpointReturn, RawUrlAnalysis } from '@app/types';
 import { makeApiRequest } from '@app/utils/makeApiReq';
 import Link from 'next/link';
@@ -10,16 +11,27 @@ import { RxDoubleArrowLeft, RxDoubleArrowRight } from 'react-icons/rx';
 
 const limit = 5;
 
+export const runtime = 'experimental-edge';
+
 export default function Home() {
 	const router = useRouter();
 
 	const [recent, setRecent] = useState<RawUrlAnalysis[]>([]);
 	const [offset, setOffset] = useState(0);
 	const [total, setTotal] = useState(0);
+	const { setError, ErrorElement } = useError(null);
 
 	useEffect(() => {
 		const fetchRecent = async () => {
-			const res = await makeApiRequest<GETRecentScanEndpointReturn>(`/scan/recent?limit=${limit}&offset=${offset}`);
+			const res = await makeApiRequest<GETRecentScanEndpointReturn>(
+				`/scan/recent?limit=${limit}&offset=${offset}`,
+			).catch((error_) => {
+				setError(error_.message);
+			});
+
+			if (!res) {
+				return;
+			}
 
 			setRecent(res.data?.data ?? []);
 			setTotal(res.data?.count ?? 0);
@@ -28,10 +40,11 @@ export default function Home() {
 		setRecent([]);
 
 		void fetchRecent();
-	}, [offset]);
+	}, [offset, setError]);
 
 	return (
 		<main className="align-middle items-center pt-[3rem] justify-center flex flex-col gap-10">
+			<ErrorElement />
 			<AnalyzerBar router={router} />
 			<div className="flex flex-col bg-gray-500 p-4 rounded gap-3 justify-center max-xl:w-3/4 w-1/2 ">
 				<div className="text-3xl font-bold text-white m-3 ml-5 bg-gray-600 w-fit p-2 rounded">Recent Scans:</div>
