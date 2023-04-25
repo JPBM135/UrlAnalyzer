@@ -57,3 +57,16 @@ export type GETRecentScanEndpointReturn = GeneralPaginatedEndpointReturn<{
 	count: number;
 	data: RawUrlAnalysis[];
 }>;
+
+// Formatter
+
+export type POSTFormatBodyEndpointReturn = GeneralEndpointReturn<{
+	data: string;
+	ok: boolean;
+}>;
+
+export interface POSTFormatBodyEndpointBody {
+	body?: string;
+	id?: string;
+	resource_type: string;
+}

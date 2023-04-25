@@ -1,4 +1,3 @@
-import type { IOKRule } from '@functions/iok/types.js';
 import type { ConsoleMessageType, JSHandle, Protocol, ResourceType } from 'puppeteer';
 import type { BaseProps, PopulatedRequest, RawCertificate } from './database.js';
 import type {
@@ -8,6 +7,7 @@ import type {
 	TransparencyReportFlags,
 	TransparencyReportGenericStatus,
 } from './enums.js';
+import type { IOKRule } from './iok-types.js';
 
 export interface SafeBrowsingResponse {
 	matches: ThreatMatch[];
@@ -99,7 +99,7 @@ export interface TransparencyReport {
 
 export interface RequestResult {
 	headers: Record<string, string>;
-	initiator: Protocol.Network.Initiator;
+	initiator?: Protocol.Network.Initiator;
 	method: string;
 	nonce?: string;
 	post_data: string | undefined;
