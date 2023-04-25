@@ -1,9 +1,11 @@
+'use client';
+
+import type { POSTFormatBodyEndpointReturn } from '@app/types';
 import type { UrlAnalysisResult } from '@app/types/types';
-import type { FormatBodyReturn } from '@app/utils/formatBody';
-import { formatBody } from '@app/utils/formatBody';
+import { makeApiRequest } from '@app/utils/makeApiReq';
 import { capitalizeFirstLetter } from '@app/utils/string';
 import type { ConsoleMessageType } from 'puppeteer';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CodeRenderer } from '../CodeRenderer';
 
 function colorFromConsoleType(type: ConsoleMessageType) {
@@ -24,15 +26,16 @@ function colorFromConsoleType(type: ConsoleMessageType) {
 export function PageInfo({ result }: { result: UrlAnalysisResult }) {
 	const { consoleOutput, body } = result;
 
-	const worker = useRef<Worker>(new Worker(new URL('../../worker.ts', import.meta.url), { type: 'module' }));
-
-	const [formatted, setFormatted] = useState<FormatBodyReturn | null>(null);
+	const [formatted, setFormatted] = useState<POSTFormatBodyEndpointReturn['data']>(null);
 	const [isFormatted, setIsFormatted] = useState(false);
 
 	useEffect(() => {
 		const format = async () => {
-			const result = await formatBody(body, 'document', worker.current);
-			setFormatted(result);
+			const result = await makeApiRequest<POSTFormatBodyEndpointReturn>('/formatter/format', {
+				method: 'POST',
+				body: JSON.stringify({ body, resource_type: 'document' }),
+			});
+			setFormatted(result.data);
 			setIsFormatted(true);
 		};
 
