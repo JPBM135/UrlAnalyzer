@@ -1,28 +1,59 @@
+'use client';
+
+import type { POSTFormatBodyEndpointReturn } from '@app/types';
 import type { UrlAnalysisResult } from '@app/types/types';
-import { formatBody } from '@app/utils/formatBody';
+import { makeApiRequest } from '@app/utils/makeApiReq';
 // @ts-expect-error: No types for highlight.js styles
 import style from 'highlight.js/styles/atom-one-dark.css';
-import { useRef, useState } from 'react';
-import type { FormatBodyReturn } from '../../utils/formatBody';
+import { useState } from 'react';
+import type { FormatBodyReturn } from '../../../../api/src/utils/formatBody';
 import { CodeRenderer } from '../CodeRenderer';
 import { FormatHeaders } from './RequestHeaders';
+
+interface FormattedBodies {
+	[key: string]: FormatBodyReturn | boolean;
+}
+
+const formatBody = async ({
+	resource_type,
+	formattedBodies,
+	setFormattedBodies,
+	id,
+}: {
+	formattedBodies: FormattedBodies;
+	id: string;
+	resource_type: string;
+	setFormattedBodies(formattedBodies: FormattedBodies): void;
+}) => {
+	setFormattedBodies({
+		...formattedBodies,
+		[id]: true,
+	});
+
+	const formatted = await makeApiRequest<POSTFormatBodyEndpointReturn>('/formatter/format', {
+		method: 'POST',
+		body: JSON.stringify({ id, resource_type }),
+	});
+
+	setFormattedBodies({
+		...formattedBodies,
+		[id]: formatted.data!,
+	});
+};
 
 export function Requests({ result }: { result: UrlAnalysisResult }) {
 	const { requests } = result;
 
 	const [opened, setOpened] = useState<string[]>([]);
-	const [formattedBodies, setFormattedBodies] = useState<{
-		[key: string]: FormatBodyReturn | boolean;
-	}>({});
-
-	const workerRef = useRef<Worker>(new Worker(new URL('../../worker.ts', import.meta.url), { type: 'module' }));
+	const [formattedBodies, setFormattedBodies] = useState<FormattedBodies>({});
 
 	return (
 		<div className="mb-10 mx-10 p-5 flex justify-between rounded-md bg-white">
 			<div style={{ width: '80%', margin: '0 auto' }}>
 				<div className="text-5xl font-bold font-sans p-5 pb-10">Requests:</div>
 				{requests.map((request, idx) => {
-					let urlWithoutQuery: string | null = new URL(request.url).origin;
+					const urlClass = new URL(request.url);
+					let urlWithoutQuery: string | null = `${urlClass.origin}/${urlClass.pathname.split('/')[1]!}`;
 
 					if (urlWithoutQuery === 'null') urlWithoutQuery = null;
 
@@ -73,25 +104,33 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 									<span className="font-bold">Close</span>
 								</button>
 							</div>
-							<div className="flex">
-								<div>
-									<div className="text-white p-1 ml-2">
-										<span className="font-bold">Id: </span>
-										{request.id}
+							<div className="flex flex-col">
+								<div className="flex">
+									<div>
+										<div className="text-white p-1 ml-2">
+											<span className="font-bold">Id: </span>
+											{request.id}
+										</div>
+										<div className="text-white p-1 ml-2">
+											<span className="font-bold">Method: </span>
+											{request.method}
+										</div>
 									</div>
-									<div className="text-white p-1 ml-2">
-										<span className="font-bold">Method: </span>
-										{request.method}
+									<div>
+										<div className="text-white p-1 ml-2">
+											<span className="font-bold">Status: </span>
+											{request.response?.status || 'N/A'}
+										</div>
+										<div className="text-white p-1 ml-2">
+											<span className="font-bold">Resource type: </span>
+											{request.resource_type || 'N/A'}
+										</div>
 									</div>
 								</div>
 								<div>
 									<div className="text-white p-1 ml-2">
-										<span className="font-bold">Status: </span>
-										{request.response?.status || 'N/A'}
-									</div>
-									<div className="text-white p-1 ml-2">
-										<span className="font-bold">Resource type: </span>
-										{request.resource_type || 'N/A'}
+										<span className="font-bold">Full Url: </span>
+										<span className="text-gray-800">{request.url}</span>
 									</div>
 								</div>
 							</div>
@@ -126,23 +165,14 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 												) : (
 													<button
 														className="bg-gray-600 p-3 rounded"
-														onClick={async () => {
-															setFormattedBodies({
-																...formattedBodies,
-																[request.id]: true,
-															});
-
-															const formatted = await formatBody(
-																request.response!.body!,
-																request.resource_type,
-																workerRef.current,
-															);
-
-															setFormattedBodies({
-																...formattedBodies,
-																[request.id]: formatted,
-															});
-														}}
+														onClick={async () =>
+															formatBody({
+																id: request.id,
+																formattedBodies,
+																resource_type: request.resource_type,
+																setFormattedBodies,
+															})
+														}
 														type="button"
 													>
 														Show Body
