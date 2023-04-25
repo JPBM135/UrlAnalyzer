@@ -1,6 +1,7 @@
 import type { RawSession, SafeSession } from '@types';
 import { generateCompoundSnowflake } from '@utils/idUtils.js';
 import { removeUndefinedKeys } from '@utils/object.js';
+import { databaseSanitize } from '@utils/sanitize.js';
 import { generateToken } from '@utils/token.js';
 import { TableWorkerIdentifiers } from 'constants.js';
 import type { Sql } from 'postgres';
@@ -12,11 +13,11 @@ export async function createSession(data: { user_id: string }): Promise<SafeSess
 
 	const token = generateToken(data.user_id);
 
-	const session: Omit<RawSession, 'created_at' | 'updated_at'> = {
+	const session: Omit<RawSession, 'created_at' | 'updated_at'> = databaseSanitize({
 		id: generateCompoundSnowflake(TableWorkerIdentifiers.Sessions),
 		session_token: token.hash,
 		user_id: data.user_id,
-	};
+	});
 
 	const [rawSession] = await sql<[RawSession]>`
 		insert into sessions ${sql(session as Record<string, unknown>, ...Object.keys(session))}
