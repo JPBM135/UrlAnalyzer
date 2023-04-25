@@ -16,6 +16,8 @@ const onSubmit = async (elm: React.FormEvent, router: AppRouterInstance) => {
 
 	url.style.border = '2px solid green';
 
+	router.push('/scan/create');
+
 	const res = await makeApiRequest<POSTScanResultEndpointReturn>('/scan/create', {
 		method: 'POST',
 		body: JSON.stringify({ url: url.value }),
