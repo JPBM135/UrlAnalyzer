@@ -3,3 +3,5 @@ export const REGEXES = {
 	USERNAME: /^[\w.-]{3,32}$/,
 	PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!"#$%&'()-_{|}])[\d!"#$%&'()-_a-z{|}]{8,32}$/,
 };
+
+export const IOK_BASE_URL = 'https://phish.report/IOK/indicators/';
