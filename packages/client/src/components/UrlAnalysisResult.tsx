@@ -1,7 +1,6 @@
 'use client';
 
 import type { GETScanEndpointReturn } from '@app/types';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { GeneralInfo } from './UrlAnalyzerTabs/GeneralInfo';
 import { PageInfo } from './UrlAnalyzerTabs/PageDetails';
@@ -12,7 +11,6 @@ export function UrlAnalysisResult({ res }: { res: GETScanEndpointReturn }) {
 	const { data } = res;
 
 	const [tab, setTab] = useState<'general' | 'page_info' | 'requests' | 'score'>('general');
-	const router = useRouter();
 
 	if (!data)
 		return (
@@ -53,7 +51,7 @@ export function UrlAnalysisResult({ res }: { res: GETScanEndpointReturn }) {
 				</button>
 			</div>
 			{tab === 'general' ? (
-				<GeneralInfo result={data} router={router} />
+				<GeneralInfo result={data} />
 			) : tab === 'requests' ? (
 				<Requests result={data} />
 			) : tab === 'page_info' ? (

@@ -1,3 +1,6 @@
+'use client';
+
+import { IOK_BASE_URL } from '@app/constants';
 import type { POSTScanResultEndpointReturn } from '@app/types';
 import { TransparencyReportGenericStatus, TransparencyReportFlags } from '@app/types/enums';
 import type { UrlAnalysisResult } from '@app/types/types';
@@ -7,6 +10,7 @@ import { capitalizeFirstLetter } from '@app/utils/string';
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FcHighPriority, FcOk } from 'react-icons/fc';
 import favicon from '../../../public/favicon.ico';
@@ -21,7 +25,29 @@ const onScanClick = async (router: AppRouterInstance, url: string) => {
 	router.push(`/scan/${res.data!.id}`);
 };
 
-export function GeneralInfo({ result, router }: { result: UrlAnalysisResult; router: AppRouterInstance }) {
+const FormatIOKUrl = (title: string) => {
+	const urlSuffix = title.replaceAll(' ', '-').toLowerCase();
+	return <Link href={`${IOK_BASE_URL}${urlSuffix}`}> Source </Link>;
+};
+
+const findEffectiveStatus = (result: UrlAnalysisResult) => {
+	const { requests } = result;
+
+	for (const req of requests) {
+		const status = req.response?.status;
+		if (!status) continue;
+
+		if ([301, 302, 303, 307, 308].includes(status)) continue;
+
+		return status;
+	}
+
+	return 'N/A';
+};
+
+export function GeneralInfo({ result }: { result: UrlAnalysisResult }) {
+	const router = useRouter();
+
 	const dateFormat = new Intl.DateTimeFormat('en-US', {
 		year: 'numeric',
 		month: 'long',
@@ -47,6 +73,9 @@ export function GeneralInfo({ result, router }: { result: UrlAnalysisResult; rou
 					</div>
 					<div>
 						<span className="text-2xl font-bold text-gray-600">Effective Url: </span> {effectiveUrl}
+					</div>
+					<div>
+						<span className="text-2xl font-bold text-gray-600">Status: </span> {findEffectiveStatus(result) ?? 'N/A'}
 					</div>
 				</div>
 				<div className="bg-gray-300 rounded-md p-4 mt-4">
@@ -123,6 +152,38 @@ export function GeneralInfo({ result, router }: { result: UrlAnalysisResult; rou
 								'No issues found'
 							)}
 						</details>
+						<div>
+							<div className="inline-flex gap-2">
+								<span className="text-2xl font-bold text-gray-600">IOK Phishing:</span>
+								{securityDetails.IOK.length ? (
+									<FcHighPriority className="my-auto" size={28} />
+								) : (
+									<FcOk className="my-auto" size={28} />
+								)}
+							</div>
+
+							<details>
+								<summary>Details</summary>
+								{securityDetails.IOK.length
+									? securityDetails.IOK.map((iokRule) => (
+											<ul className="list-disc list-inside overflow-ellipsis" key={generateRandomHash()}>
+												<li>
+													<span className="font-bold">Rule Name:</span> {iokRule.title}
+												</li>
+												<li>
+													<span className="font-bold">Description:</span> {iokRule.description}
+												</li>
+												<li>
+													<span className="font-bold">Tags:</span> {iokRule.tags.join(' | ')}
+												</li>
+												<li>
+													<span className="font-bold">Source:</span> {FormatIOKUrl(iokRule.title)}
+												</li>
+											</ul>
+									  ))
+									: 'No issues found'}
+							</details>
+						</div>
 					</div>
 				</div>
 				<div className="mt-4">
@@ -213,6 +274,7 @@ export function GeneralInfo({ result, router }: { result: UrlAnalysisResult; rou
 						alt="Screenshot"
 						className="rounded"
 						height={90 * 5}
+						loading="lazy"
 						src={screenshot?.url ?? favicon}
 						width={160 * 5}
 					/>
