@@ -1,3 +1,7 @@
+'use client';
+
+export const runtime = 'experimental-edge';
+
 export default function PrivacyPage() {
 	return (
 		<main className="flex flex-col justify-evenly px-64 pb-64 pt-10">

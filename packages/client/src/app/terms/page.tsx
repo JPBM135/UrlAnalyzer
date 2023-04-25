@@ -1,3 +1,7 @@
+'use client';
+
+export const runtime = 'experimental-edge';
+
 export default function TermsPage() {
 	return (
 		<main className="flex flex-col justify-evenly mx-48 mb-48 mt-10">
