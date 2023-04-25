@@ -1,4 +1,5 @@
 import type { RawUrlAnalysis } from '@types';
+import { databaseSanitize } from '@utils/sanitize.js';
 import type { Sql } from 'postgres';
 import { kSQL } from 'tokens.js';
 import { container } from 'tsyringe';
@@ -8,7 +9,7 @@ export async function createUrlAnalysis(
 ): Promise<RawUrlAnalysis> {
 	const sql = container.resolve<Sql<any>>(kSQL);
 
-	const query: Omit<RawUrlAnalysis, 'created_at' | 'updated_at'> = {
+	const query: Omit<RawUrlAnalysis, 'created_at' | 'updated_at'> = databaseSanitize({
 		id: data.id,
 		author_id: data.author_id,
 		body: data.body,
@@ -25,7 +26,7 @@ export async function createUrlAnalysis(
 		urls_found: data.urls_found,
 		url: data.url,
 		lighthouse_analysis: data.lighthouse_analysis,
-	};
+	});
 
 	const [result] = await sql<[RawUrlAnalysis]>`
 		insert into url_analysis ${sql(query as Record<string, unknown>, ...Object.keys(query))}
