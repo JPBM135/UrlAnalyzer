@@ -62,7 +62,6 @@
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		"../api/src/utils/formatBody.ts"
 	],
 	"exclude": [
 		"node_modules"

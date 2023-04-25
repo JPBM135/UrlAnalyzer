@@ -6,12 +6,16 @@ import { makeApiRequest } from '@app/utils/makeApiReq';
 // @ts-expect-error: No types for highlight.js styles
 import style from 'highlight.js/styles/atom-one-dark.css';
 import { useState } from 'react';
-import type { FormatBodyReturn } from '../../../../api/src/utils/formatBody';
 import { CodeRenderer } from '../CodeRenderer';
 import { FormatHeaders } from './RequestHeaders';
 
+interface RawFormattedData {
+	data: string;
+	ok: boolean;
+}
+
 interface FormattedBodies {
-	[key: string]: FormatBodyReturn | boolean;
+	[key: string]: RawFormattedData | boolean;
 }
 
 const formatBody = async ({
@@ -158,8 +162,8 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 														<div className="bg-gray-600 break-all p-3 rounded word-wrap">Loading...</div>
 													) : (
 														<CodeRenderer
-															data={(formattedBodies[request.id]! as FormatBodyReturn).data}
-															ok={(formattedBodies[request.id]! as FormatBodyReturn).ok}
+															data={(formattedBodies[request.id]! as RawFormattedData).data}
+															ok={(formattedBodies[request.id]! as RawFormattedData).ok}
 														/>
 													)
 												) : (
