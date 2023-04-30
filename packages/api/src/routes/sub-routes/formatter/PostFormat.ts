@@ -1,3 +1,4 @@
+import { getRequest } from '@database/requests/getRequest.js';
 import { getResponse } from '@database/responses/getResponse.js';
 import { HttpError } from '@structures/httpError.js';
 import type { POSTFormatBodyEndpointReturn } from '@types';
@@ -22,7 +23,9 @@ export async function formatHandler(req: Request, res: Response): Promise<void> 
 			throw new HttpError(HttpStatusCode.BadRequest, 'ValidationFailed', 'Missing resource_type');
 		}
 
-		const response = id ? await getResponse(id) : null;
+		const request = id ? await getRequest(id) : null;
+
+		const response = id && request?.response_id ? await getResponse(request.response_id ?? id) : null;
 
 		if (id && !response) {
 			throw new HttpError(HttpStatusCode.NotFound, 'NotFound', 'Response not found');
