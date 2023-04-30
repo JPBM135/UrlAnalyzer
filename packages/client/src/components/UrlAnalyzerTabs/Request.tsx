@@ -87,7 +87,7 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 									</div>
 									<div className="text-white p-2">
 										<span className="font-bold">Status: </span>
-										{request.response?.status || 'N/A'}
+										{request.response?.status ?? 'N/A'}
 									</div>
 								</div>
 							</div>
@@ -123,11 +123,11 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 									<div>
 										<div className="text-white p-1 ml-2">
 											<span className="font-bold">Status: </span>
-											{request.response?.status || 'N/A'}
+											{request.response?.status ?? 'N/A'}
 										</div>
 										<div className="text-white p-1 ml-2">
 											<span className="font-bold">Resource type: </span>
-											{request.resource_type || 'N/A'}
+											{request.resource_type ?? 'N/A'}
 										</div>
 									</div>
 								</div>
@@ -144,7 +144,7 @@ export function Requests({ result }: { result: UrlAnalysisResult }) {
 							{request.post_data && (
 								<div className="text-white p-1 my-2 ml-2 border-t-2 border-t-gray-400">
 									<div className="font-bold py-3 text-xl">Request body: </div>
-									<div className="bg-gray-600 p-2 rounded">{request.post_data || 'N/A'}</div>
+									<div className="bg-gray-600 p-2 rounded">{request.post_data ?? 'N/A'}</div>
 								</div>
 							)}
 							{request.response && (

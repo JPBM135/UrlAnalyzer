@@ -1,6 +1,6 @@
 'use client';
 
-export const runtime = 'experimental-edge';
+export const runtime = process.env.NEXT_PUBLIC_ENV_RUNTIME ?? 'nodejs';
 
 export default function TermsPage() {
 	return (

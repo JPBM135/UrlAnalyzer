@@ -4,7 +4,6 @@ const nextConfig = {
 	reactStrictMode: true,
 	experimental: {
 		appDir: true,
-		runtime: 'edge',
 	},
 	images: {
 		domains: ['i.imgur.com'],

@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { BiErrorAlt } from 'react-icons/bi';
 import { RxDoubleArrowLeft } from 'react-icons/rx';
 
-export const runtime = 'experimental-edge';
+export const runtime = process.env.NEXT_PUBLIC_ENV_RUNTIME ?? 'nodejs';
 
 export default function ScanPage({ params }: { params: { id: string } }) {
 	const { id } = params;

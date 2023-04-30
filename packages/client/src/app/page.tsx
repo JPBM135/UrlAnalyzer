@@ -11,7 +11,7 @@ import { RxDoubleArrowLeft, RxDoubleArrowRight } from 'react-icons/rx';
 
 const limit = 5;
 
-export const runtime = 'experimental-edge';
+export const runtime = process.env.NEXT_PUBLIC_ENV_RUNTIME ?? 'nodejs';
 
 export default function Home() {
 	const router = useRouter();

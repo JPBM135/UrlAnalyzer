@@ -20,7 +20,7 @@ import { SiDiscord } from 'react-icons/si';
 import MicrosoftSvg from '../../../public/Microsoft.svg';
 import { validateEmail } from '../../utils/validators';
 
-export const runtime = 'experimental-edge';
+export const runtime = process.env.NEXT_PUBLIC_ENV_RUNTIME ?? 'nodejs';
 
 const handleNormalLogin = async (setters: {
 	auth: ReturnType<typeof useAuth>;
