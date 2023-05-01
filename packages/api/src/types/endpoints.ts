@@ -70,3 +70,7 @@ export interface POSTFormatBodyEndpointBody {
 	id?: string;
 	resource_type: string;
 }
+
+// Utils
+
+export type GETUtilsFactsEndpointReturn = GeneralEndpointReturn<string[]>;
