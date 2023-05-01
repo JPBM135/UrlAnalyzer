@@ -4,6 +4,8 @@ import { LoadingSpin } from '@app/components/Loading';
 import { RandomFacts } from '@app/components/RandomFact';
 import { UrlAnalysisResult as UrlAnalysisResultComponent } from '@app/components/UrlAnalysisResult';
 import type { GETScanEndpointReturn } from '@app/types';
+import type { WebSocketData } from '@app/types/types';
+import { generateRandomHash } from '@app/utils/generateRandom';
 import { makeApiRequest } from '@app/utils/makeApiReq';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -17,6 +19,30 @@ export default function ScanPage({ params }: { params: { id: string } }) {
 
 	const [result, setResult] = useState<GETScanEndpointReturn | null>(null);
 	const [error, setError] = useState<string | null>(null);
+
+	const [wsEvents, setWsEvents] = useState<(WebSocketData & { formatted: string })[]>([]);
+
+	useEffect(
+		() => {
+			const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}/api/v1/scan/${id}/ws`);
+
+			ws.addEventListener('message', (event) => {
+				const data = JSON.parse(event.data);
+
+				const events = [
+					...wsEvents,
+					{
+						...data,
+						formatted: `${new Date(data.timestamp).toISOString().slice(11).slice(0, 8)} | ${data.data}`,
+					},
+				].sort((a, b) => a.timestamp - b.timestamp);
+
+				setWsEvents(events);
+			});
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	);
 
 	useEffect(() => {
 		if (id === 'create') {
@@ -72,9 +98,24 @@ export default function ScanPage({ params }: { params: { id: string } }) {
 				</div>
 			) : (
 				<div className="flex justify-between h-full flex-col items-center gap-72">
-					<div className="flex justify-center w-2/3 items-center m-20 text-5xl font-bold font-sans bg-gray-100 rounded-xl text-center text-gray-600">
-						<LoadingSpin />
-						Processing your request...
+					<div>
+						<div className="flex justify-center w-auto px-10 items-center m-20 text-5xl font-bold font-sans bg-gray-100 rounded-xl text-center text-gray-600">
+							<LoadingSpin />
+							Processing your request...
+						</div>
+						<div className="flex flex-col bg-gray-500 p-4 rounded gap-3 justify-center w-auto">
+							<div className="text-3xl font-bold text-white m-3 ml-5 bg-gray-600 w-fit p-2 rounded">Realtime Logs:</div>
+							{wsEvents.map((scan, idx) => (
+								<div
+									className={`flex flex-col text-start p-4 rounded text-white ${
+										idx % 2 === 0 ? 'bg-gray-600' : 'bg-gray-700'
+									}`}
+									key={generateRandomHash()}
+								>
+									<span>{scan.formatted}</span>
+								</div>
+							))}
+						</div>
 					</div>
 					<RandomFacts />
 				</div>
