@@ -31,7 +31,7 @@ export function PageInfo({ result }: { result: UrlAnalysisResult }) {
 
 	useEffect(() => {
 		const format = async () => {
-			const result = await makeApiRequest<POSTFormatBodyEndpointReturn>('/formatter/format', {
+			const result = await makeApiRequest<POSTFormatBodyEndpointReturn>('/utils/format', {
 				method: 'POST',
 				body: JSON.stringify({ body, resource_type: 'document' }),
 			});

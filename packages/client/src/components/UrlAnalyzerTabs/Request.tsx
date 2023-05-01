@@ -34,7 +34,7 @@ const formatBody = async ({
 		[id]: true,
 	});
 
-	const formatted = await makeApiRequest<POSTFormatBodyEndpointReturn>('/formatter/format', {
+	const formatted = await makeApiRequest<POSTFormatBodyEndpointReturn>('/utils/format', {
 		method: 'POST',
 		body: JSON.stringify({ id, resource_type }),
 	});
