@@ -1,6 +1,6 @@
 'use client';
 
-export const runtime = process.env.NEXT_PUBLIC_ENV_RUNTIME ?? 'nodejs';
+export const runtime = 'nodejs';
 
 export default function TermsPage() {
 	return (
