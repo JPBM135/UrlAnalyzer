@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { createCache } from 'container/cache.js';
+import { createWebsocketServer } from 'container/websocketServer.js';
 import { createRouter } from 'routes/index.js';
 import { createExpressApp } from './container/express.js';
 import { createImgurClient } from './container/imgur.js';
@@ -23,6 +24,9 @@ logger.success('Postgres client created');
 
 createImgurClient();
 logger.success('Imgur client created');
+
+createWebsocketServer();
+logger.success('Websocket server created');
 
 await createCache();
 logger.success('Cache created');

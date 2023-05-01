@@ -1,6 +1,7 @@
 import { X509Certificate } from 'node:crypto';
 import { resolve } from 'node:dns/promises';
 import process from 'node:process';
+import { setTimeout as wait } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { createCertificateDetails } from '@database/certificate_details/createCertDetails.js';
 import { getCertificateDetails } from '@database/certificate_details/getCertDetails.js';
@@ -22,7 +23,7 @@ import lighthouse from 'lighthouse';
 import getMetaData from 'metadata-scraper';
 import { Counter, Histogram } from 'prom-client';
 import type { Page, Protocol, Browser, CDPSession, HTTPResponse, HTTPRequest } from 'puppeteer';
-import { kCache, kImgur, kPuppeteer } from 'tokens.js';
+import { kCache, kImgur, kPuppeteer, kWebSockets } from 'tokens.js';
 import { container } from 'tsyringe';
 import type {
 	ConsoleOutput,
@@ -31,7 +32,9 @@ import type {
 	Screenshot,
 	UrlAnalysisResult,
 	UrlSecurityDetails,
+	WebSocketData,
 } from 'types/types.js';
+import type { WebSocket, WebSocketServer } from 'ws';
 
 const scansMetrics = new Counter({
 	name: 'url_analyzer_api_scans_total',
@@ -101,6 +104,10 @@ export default class UrlAnalysis {
 
 	private startTime: [number, number] = process.hrtime();
 
+	public websocket: WebSocket | null = null;
+
+	private pastProgress: WebSocketData[] = [];
+
 	public constructor(url: string, owner_id: string | null) {
 		this.browser = container.resolve<Browser>(kPuppeteer);
 
@@ -119,6 +126,15 @@ export default class UrlAnalysis {
 
 		this._promises = [];
 
+		const globalServer = container.resolve<WebSocketServer>(kWebSockets);
+		globalServer.on(`connection:${this.id}`, (socket: WebSocket) => {
+			this.websocket = socket;
+
+			for (const data of this.pastProgress) {
+				this.websocket.send(JSON.stringify(data));
+			}
+		});
+
 		scansMetrics.inc({ domain: new URL(url).hostname });
 	}
 
@@ -127,28 +143,55 @@ export default class UrlAnalysis {
 
 		try {
 			this.page = await this.browser.newPage();
+			this.page.setDefaultNavigationTimeout(60_000);
+			this.emitProgress({
+				type: 'message',
+				data: 'Page created',
+			});
 
 			await this.page.setRequestInterception(true);
+			this.emitProgress({
+				type: 'message',
+				data: 'Request interception enabled',
+			});
 			this.registerListeners();
+			this.emitProgress({
+				type: 'message',
+				data: 'Listeners registered',
+			});
 
 			const client = await this.page.target().createCDPSession();
 			await client.send('Network.enable');
+			this.emitProgress({
+				type: 'message',
+				data: 'Network enabled and devtools opened',
+			});
 
 			const pageResponse = await this.page.goto(this.url, { waitUntil: 'networkidle2' });
+			this.emitProgress({
+				type: 'message',
+				data: 'Page loaded',
+			});
 
 			this.effectiveUrl = this.page.url();
 
-			const [body, cookies] = await Promise.all([
-				this.page.content(),
-				this.page.cookies(),
+			const [body, cookies] = await Promise.all([this.page.content(), this.page.cookies()]);
+
+			this.emitProgress({
+				type: 'message',
+				data: 'Page content and cookies retrieved',
+			});
+
+			this.body = body;
+			this.cookies = cookies;
+
+			await Promise.all([
 				this.screenshot(),
 				this.resolveDns(),
 				this.getCertificate(client, pageResponse!),
 				this.lightHouse(),
 			]);
 
-			this.body = body;
-			this.cookies = cookies;
 			await this.processBody();
 
 			const result = await this.finish();
@@ -160,6 +203,10 @@ export default class UrlAnalysis {
 		} catch (error) {
 			console.error(error);
 			await this.page?.close();
+			this.emitProgress({
+				type: 'error',
+				data: 'An error occured while processing the page :(',
+			});
 
 			cache.set(this.id, {
 				ok: false,
@@ -241,6 +288,10 @@ export default class UrlAnalysis {
 		}
 
 		this.lhReport = partial as LightHouseReport;
+		this.emitProgress({
+			type: 'message',
+			data: 'LightHouse report generated',
+		});
 	}
 
 	public async screenshot() {
@@ -248,6 +299,11 @@ export default class UrlAnalysis {
 			fullPage: true,
 			quality: 100,
 			type: 'jpeg',
+		});
+
+		this.emitProgress({
+			type: 'message',
+			data: 'Screenshot taken',
 		});
 
 		if (!buffer) return;
@@ -259,6 +315,11 @@ export default class UrlAnalysis {
 				url: this.url,
 			})
 			.catch(() => null);
+
+		this.emitProgress({
+			type: 'message',
+			data: 'Screenshot uploaded',
+		});
 	}
 
 	public async getCertificate(client: CDPSession, res: HTTPResponse) {
@@ -314,6 +375,10 @@ export default class UrlAnalysis {
 		});
 
 		this.certificate_id = this.certificate.id;
+		this.emitProgress({
+			type: 'message',
+			data: 'Certificate report generated',
+		});
 	}
 
 	public async resolveDns() {
@@ -361,25 +426,30 @@ export default class UrlAnalysis {
 				request.resource_type as ReturnType<HTTPRequest['resourceType']>,
 			);
 
-			const dbResponse = await createResponse({
-				...request.response,
-				id: this.id,
-				parent_id: this.id,
-				body: resource_type_allowed ? request.response.body : null,
-			});
-			const dbRequest = await createRequest({
-				...request,
-				id: this.id,
-				parent_id: this.id,
-				response_id: dbResponse.id,
-				nonce: request.headers['x-url-analyzer-nonce'] ?? null,
-			});
+			const dbResponse = await this.addAndResolvePromise(
+				createResponse({
+					...request.response,
+					id: this.id,
+					parent_id: this.id,
+					body: resource_type_allowed ? request.response.body : null,
+				}),
+			);
+			const dbRequest = await this.addAndResolvePromise(
+				createRequest({
+					...request,
+					id: this.id,
+					parent_id: this.id,
+					response_id: dbResponse.id,
+					nonce: request.headers['x-url-analyzer-nonce'] ?? null,
+				}),
+			);
 
 			this.requests.push({
 				...dbRequest,
 				response: dbResponse,
 			});
 			this.requests_ids.push(dbRequest.id);
+			console.log('Request', dbRequest.id, 'added', this.requests.length);
 		});
 
 		this.page.on('console', (message) => {
@@ -407,6 +477,11 @@ export default class UrlAnalysis {
 				cookies: this.cookies,
 			}),
 		};
+
+		this.emitProgress({
+			type: 'message',
+			data: 'Security details fetched',
+		});
 	}
 
 	public async processBody() {
@@ -421,6 +496,10 @@ export default class UrlAnalysis {
 		const urls = Array.from(new Set(this.body.matchAll(REGEXES.URL)));
 
 		this.urlsFound = urls.map((url) => url[0].replace(/["'>].+$/, ''));
+		this.emitProgress({
+			type: 'message',
+			data: 'Body and metadata processed',
+		});
 	}
 
 	public async finish(): Promise<UrlAnalysisResult> {
@@ -431,7 +510,10 @@ export default class UrlAnalysis {
 			});
 		}
 
-		await Promise.all([this.page!.close(), ...this._promises]);
+		console.log('Closing page', this._promises.length, this.requests_ids.length);
+		await this.page!.close();
+		await Promise.race([Promise.all(this._promises), wait(7_000)]);
+		console.log('Page closed');
 
 		await this.securityDetails();
 
@@ -461,6 +543,12 @@ export default class UrlAnalysis {
 
 		processingTime.labels(domain).observe((timeTook[0] * 1e9 + timeTook[1]) / 1e6);
 
+		this.emitProgress({
+			type: 'message',
+			data: 'Analysis finished',
+		});
+		this.websocket?.close();
+
 		return UrlAnalysis.createFromDbResult(this.dbResult!, {
 			certificate: this.certificate!,
 			requests: this.requests,
@@ -469,6 +557,11 @@ export default class UrlAnalysis {
 
 	private async addAndResolvePromise<T>(promise: Promise<T>) {
 		this._promises.push(promise);
+
+		// eslint-disable-next-line promise/prefer-await-to-then
+		void promise.finally(() => {
+			this._promises.splice(this._promises.indexOf(promise), 1);
+		});
 
 		return promise;
 	}
@@ -528,5 +621,17 @@ export default class UrlAnalysis {
 			updated_at: result.updated_at,
 			url: result.url,
 		};
+	}
+
+	private emitProgress(data: Omit<WebSocketData, 'timestamp'>) {
+		const progress = {
+			...data,
+			timestamp: Date.now(),
+		};
+
+		this.pastProgress.push(progress);
+		if (!this.websocket) return;
+
+		this.websocket.send(JSON.stringify(progress));
 	}
 }

@@ -10,6 +10,7 @@ export async function formatHTTPRequest(request: HTTPRequest, nonce?: string): P
 		if (!redirect.response()?.ok()) continue;
 
 		redirects.push(await formatHTTPRequest(redirect));
+		console.log(redirects.length);
 	}
 
 	return {
@@ -18,7 +19,7 @@ export async function formatHTTPRequest(request: HTTPRequest, nonce?: string): P
 		headers: request.headers(),
 		post_data: request.postData(),
 		resource_type: request.resourceType(),
-		response: request.response() ? await formatHTTPResponse(request.response()!) : null,
+		response: null,
 		redirect_chain: redirects,
 		initiator: request.initiator(),
 		nonce,

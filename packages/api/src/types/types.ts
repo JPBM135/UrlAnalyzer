@@ -220,3 +220,9 @@ export type InternalCache = Map<
 		ok: boolean;
 	}
 >;
+
+export interface WebSocketData {
+	data: Record<string, unknown> | string;
+	timestamp: number;
+	type: 'close' | 'error' | 'message' | 'open';
+}
