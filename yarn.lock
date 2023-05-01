@@ -1269,6 +1269,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ws@npm:^8.5.4":
+  version: 8.5.4
+  resolution: "@types/ws@npm:8.5.4"
+  dependencies:
+    "@types/node": "*"
+  checksum: fefbad20d211929bb996285c4e6f699b12192548afedbe4930ab4384f8a94577c9cd421acaad163cacd36b88649509970a05a0b8f20615b30c501ed5269038d1
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.0
   resolution: "@types/yargs-parser@npm:21.0.0"
@@ -8787,6 +8796,7 @@ __metadata:
     "@types/express": ^4.17.17
     "@types/micromatch": ^4.0.2
     "@types/node": ^18.16.0
+    "@types/ws": ^8.5.4
     bcrypt: ^5.1.0
     cors: ^2.8.5
     cpy-cli: ^4.2.0
@@ -8818,6 +8828,7 @@ __metadata:
     vite: ^4.3.1
     vite-tsconfig-paths: ^4.2.0
     vitest: ^0.28.5
+    ws: ^8.13.0
     yaml: ^2.2.2
   languageName: unknown
   linkType: soft
@@ -9234,7 +9245,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.13.0":
+"ws@npm:8.13.0, ws@npm:^8.13.0":
   version: 8.13.0
   resolution: "ws@npm:8.13.0"
   peerDependencies:
