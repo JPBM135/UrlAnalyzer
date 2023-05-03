@@ -13,7 +13,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { container } from 'tsyringe';
 import logger from '../logger.js';
-import { kExpress } from '../tokens.js';
+import { kExpress, kHttpServer, kHttpsServer } from '../tokens.js';
 
 export function createExpressApp() {
 	const app = express();
@@ -54,9 +54,11 @@ export function createExpressApp() {
 
 	const httpServer = createHttpServer(app);
 	httpServer.listen(process.env.PORT ?? 3_000);
+	container.register(kHttpServer, { useValue: httpServer });
 
 	const httpsServer = createHttpsServer(credentials, app);
 	httpsServer.listen(process.env.HTTPS_PORT ?? 8_080);
+	container.register(kHttpsServer, { useValue: httpsServer });
 
 	// Set port
 	logger.info(`[HTTP] - Express app listening on port ${process.env.PORT ?? 3_000}`);

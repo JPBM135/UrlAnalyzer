@@ -133,6 +133,10 @@ export default class UrlAnalysis {
 			for (const data of this.pastProgress) {
 				this.websocket.send(JSON.stringify(data));
 			}
+
+			if (this.dbResult) {
+				this.websocket.close();
+			}
 		});
 
 		scansMetrics.inc({ domain: new URL(url).hostname });

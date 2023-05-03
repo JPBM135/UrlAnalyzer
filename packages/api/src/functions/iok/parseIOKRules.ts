@@ -22,8 +22,6 @@ export async function parseLocalIOKRules() {
 export function parseIOKRule(raw: string): IOKRule {
 	const parsed = parse(raw) as RawIOKRule;
 
-	console.log(parsed);
-
 	const { detection } = parsed;
 	const innerRules = parseDetection(detection);
 	return {

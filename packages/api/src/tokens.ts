@@ -7,3 +7,5 @@ export const kImgur = Symbol('kImgur');
 export const kCache = Symbol('kCache');
 export const kIOKRules = Symbol('kIOKRules');
 export const kWebSockets = Symbol('kWebSockets');
+export const kHttpServer = Symbol('kHttpServer');
+export const kHttpsServer = Symbol('kHttpsServer');
