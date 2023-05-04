@@ -1,9 +1,12 @@
+import { Buffer } from 'node:buffer';
 import type { IncomingMessage } from 'node:http';
 import { HttpError } from '@structures/httpError.js';
 import { HttpStatusCode } from '@types';
 import { globToRegex } from '@utils/globToRegex.js';
+import { errorResponse } from '@utils/respond.js';
 import { validateId } from '@utils/validators.js';
 import { OP_DELIMITER } from 'constants.js';
+import type { Request, Response } from 'express';
 import type { Redis } from 'ioredis';
 import logger from 'logger.js';
 import { kRedis, kWebSockets } from 'tokens.js';
@@ -11,6 +14,16 @@ import { container } from 'tsyringe';
 import type { WebSocket, WebSocketServer } from 'ws';
 
 const SCAN_WEBSOCKET_PATH_REGEX = globToRegex('/api/v1/scan/*/ws');
+
+export async function scanGetWebsocketHandler(req: Request, res: Response): Promise<void> {
+	const wss = container.resolve<WebSocketServer>(kWebSockets);
+
+	try {
+		wss.handleUpgrade(req, req.socket, Buffer.alloc(0), scanWebsocketHandler);
+	} catch (error) {
+		errorResponse(HttpError.fromError(error as Error), res);
+	}
+}
 
 export async function scanWebsocketHandler(ws: WebSocket, req: IncomingMessage): Promise<void> {
 	const redis = container.resolve<Redis>(kRedis);
