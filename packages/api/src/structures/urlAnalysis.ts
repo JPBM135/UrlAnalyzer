@@ -20,6 +20,7 @@ import { generateCompoundSnowflake, generateSnowflake } from '@utils/idUtils.js'
 import { findArtifact } from '@utils/lighthouse.js';
 import { allowedResourceTypes, REGEXES, TableWorkerIdentifiers } from 'constants.js';
 import lighthouse from 'lighthouse';
+import logger from 'logger.js';
 import getMetaData from 'metadata-scraper';
 import { Counter, Histogram } from 'prom-client';
 import type { Page, Protocol, Browser, CDPSession, HTTPResponse, HTTPRequest } from 'puppeteer';
@@ -128,6 +129,8 @@ export default class UrlAnalysis {
 
 		const globalServer = container.resolve<WebSocketServer>(kWebSockets);
 		globalServer.on(`connection:${this.id}`, (socket: WebSocket) => {
+			logger.debug(`Connection established with ${socket.url}`);
+
 			this.websocket = socket;
 
 			for (const data of this.pastProgress) {
