@@ -24,6 +24,10 @@ export default function ScanPage({ params }: { params: { id: string } }) {
 
 	useEffect(
 		() => {
+			if (id === 'create') {
+				return;
+			}
+
 			const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}/api/v1/scan/${id}/ws`);
 
 			ws.addEventListener('message', (event) => {
