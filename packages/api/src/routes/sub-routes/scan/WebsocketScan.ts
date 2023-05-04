@@ -20,7 +20,7 @@ export async function scanGetWebsocketHandler(req: Request, res: Response): Prom
 	const redis = container.resolve<Redis>(kRedis);
 
 	try {
-		logger.debug('Connection received', {
+		logger.debug('(GET) Connection received', {
 			ip: req.socket.remoteAddress,
 		});
 
@@ -44,9 +44,11 @@ export async function scanGetWebsocketHandler(req: Request, res: Response): Prom
 			throw new HttpError(HttpStatusCode.NotFound, 'NotFound', "Scan not found or can't be connected to");
 		}
 
-		logger.info(`Client connected to scan ${scan_id}`, {
+		logger.info(`(GET) Client connected to scan ${scan_id}`, {
 			ip: req.socket.remoteAddress,
 		});
+
+		console.log(req.headers);
 
 		wss.handleUpgrade(req, req.socket, Buffer.from(req.headers['sec-websocket-key'] as string, 'base64'), (ws) => {
 			wss.emit(`connection:${scan_id}`, ws, req);
@@ -60,7 +62,7 @@ export async function scanWebsocketHandler(ws: WebSocket, req: IncomingMessage):
 	const redis = container.resolve<Redis>(kRedis);
 
 	try {
-		logger.debug('Connection received', {
+		logger.debug('(WSS) Connection received', {
 			ip: req.socket.remoteAddress,
 		});
 
@@ -86,7 +88,7 @@ export async function scanWebsocketHandler(ws: WebSocket, req: IncomingMessage):
 
 		const server = container.resolve<WebSocketServer>(kWebSockets);
 
-		logger.info(`Client connected to scan ${scan_id}`, {
+		logger.info(`(WSS) Client connected to scan ${scan_id}`, {
 			ip: req.socket.remoteAddress,
 		});
 
