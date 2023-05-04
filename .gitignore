@@ -194,3 +194,5 @@ dist
 # data
 packages/api/data/cache
 packages/api/data/IOK/*
+
+ecosystem.config.*js

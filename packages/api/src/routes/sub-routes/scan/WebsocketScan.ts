@@ -17,9 +17,40 @@ const SCAN_WEBSOCKET_PATH_REGEX = globToRegex('/api/v1/scan/*/ws');
 
 export async function scanGetWebsocketHandler(req: Request, res: Response): Promise<void> {
 	const wss = container.resolve<WebSocketServer>(kWebSockets);
+	const redis = container.resolve<Redis>(kRedis);
 
 	try {
-		wss.handleUpgrade(req, req.socket, Buffer.alloc(0), scanWebsocketHandler);
+		logger.debug('Connection received', {
+			ip: req.socket.remoteAddress,
+		});
+
+		if (!req.url?.match(SCAN_WEBSOCKET_PATH_REGEX)) {
+			throw new HttpError(HttpStatusCode.NotFound, 'RouteNotFound');
+		}
+
+		const scan_id = req.url.replace('/api/v1/scan/', '').replace('/ws', '');
+
+		if (!scan_id) {
+			throw new HttpError(HttpStatusCode.BadRequest, 'ValidationFailed', 'Missing scan ID');
+		}
+
+		if (!validateId(scan_id)) {
+			throw new HttpError(HttpStatusCode.BadRequest, 'ValidationFailed', 'Invalid scan ID');
+		}
+
+		const exists = await redis.exists(`url_analysis${OP_DELIMITER}${scan_id}`);
+
+		if (!exists) {
+			throw new HttpError(HttpStatusCode.NotFound, 'NotFound', "Scan not found or can't be connected to");
+		}
+
+		logger.info(`Client connected to scan ${scan_id}`, {
+			ip: req.socket.remoteAddress,
+		});
+
+		wss.handleUpgrade(req, req.socket, Buffer.from(req.headers['sec-websocket-key'] as string, 'base64'), (ws) => {
+			wss.emit(`connection:${scan_id}`, ws, req);
+		});
 	} catch (error) {
 		errorResponse(HttpError.fromError(error as Error), res);
 	}
