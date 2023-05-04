@@ -50,6 +50,8 @@ export async function scanGetWebsocketHandler(req: Request, res: Response): Prom
 
 		console.log(req.headers);
 
+		req.headers.upgrade ??= 'websocket';
+
 		wss.handleUpgrade(req, req.socket, Buffer.from(req.headers['sec-websocket-key'] as string, 'base64'), (ws) => {
 			wss.emit(`connection:${scan_id}`, ws, req);
 		});
