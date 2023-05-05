@@ -7,6 +7,7 @@ import type { NextFunction, Request, Response } from 'express';
 export function commonFunctionsMiddleware({ noAuthRoutes }: { noAuthRoutes: RegExp[] }) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			// @ts-expect-error: Not used for now
 			const token = noAuthRoutes.some((regex) => regex.test(req.url)) ? null : await checkAuth(req);
 
 			const rateLimit = await checkRateLimit(req.ip, req.url.split('/')?.[0] ?? 'root', null);
@@ -19,7 +20,9 @@ export function commonFunctionsMiddleware({ noAuthRoutes }: { noAuthRoutes: RegE
 				throw rateLimit.error;
 			}
 
-			console.log(token);
+			if (req.header('x-url-analyzer-ws')) {
+				req.headers.upgrade = 'websocket';
+			}
 
 			next();
 			return;

@@ -44,10 +44,7 @@ export async function scanGetWebsocketHandler(req: Request, res: Response): Prom
 			throw new HttpError(HttpStatusCode.NotFound, 'NotFound', "Scan not found or can't be connected to");
 		}
 
-		// For some reason, cloudflare doesn't set the upgrade header
-		req.headers.upgrade ??= 'websocket';
-
-		wss.handleUpgrade(req, req.socket, Buffer.from(req.headers['sec-websocket-key'] as string, 'base64'), (ws) => {
+		wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
 			logger.info(`(GET) Client connected to scan ${scan_id}`, {
 				ip: req.socket.remoteAddress,
 			});
