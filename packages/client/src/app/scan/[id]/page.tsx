@@ -42,7 +42,10 @@ export default function ScanPage({ params }: { params: { id: string } }) {
 				].sort((a, b) => a.timestamp - b.timestamp);
 
 				setWsEvents(events);
+				console.log(events, wsEvents);
 			});
+
+			return () => ws.close();
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
