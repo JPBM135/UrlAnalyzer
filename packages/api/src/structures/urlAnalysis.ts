@@ -321,12 +321,10 @@ export default class UrlAnalysis {
 				type: 'public',
 				url: this.url,
 			})
-			.catch(() => null);
-
-		this.emitProgress({
-			type: 'message',
-			data: 'Screenshot uploaded',
-		});
+			.catch((error) => {
+				console.error(error);
+				return null;
+			});
 	}
 
 	public async getCertificate(client: CDPSession, res: HTTPResponse) {
